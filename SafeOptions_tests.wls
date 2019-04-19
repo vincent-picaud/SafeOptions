@@ -62,7 +62,10 @@ doTest[1,1];
 (*normalizeOptionPattern[]*)
 
 
-Options[foo] = {a -> 1};
+<<SafeOptions`
+?normalizeOptionPattern
+
+
 foo[opts : OptionsPattern[]] := normalizeOptionPattern[opts];
 
 doTest[foo[], {}];
@@ -80,10 +83,10 @@ doTest[foo[{{a -> 1, b -> 2}}], {a -> 1, b -> 2}];
 (*normalizedOptionListQ[]*)
 
 
+<<SafeOptions`
 ?normalizedOptionListQ
 
 
-<<SafeOptions`
 doTest[normalizedOptionListQ[1,2], False];
 doTest[normalizedOptionListQ[], False];
 doTest[normalizedOptionListQ[{}], True];
@@ -197,6 +200,35 @@ doTest[updateOptions[c -> 3, {{}}], updateOptions[c -> 3, {{}}]];
 doTest[updateOptions[c -> 3, a -> 1], updateOptions[c -> 3, a -> 1]];
 doTest[updateOptions[c -> 3, {c -> 1}], { c -> 3}];
 doTest[updateOptions[c -> 3, {a -> 1, b -> 2}], {a -> 1, b -> 2, c -> 3}];
+
+
+(* ::Subchapter:: *)
+(*checkOptionsQ[]*)
+
+
+<<SafeOptions`
+?checkOptionsQ
+
+
+doTest[checkOptionsQ[{}], True];
+doTest[checkOptionsQ[{}, {{a -> 1}}], False]; (* note: must print an error message, do not worry :) *)
+doTest[checkOptionsQ[{a -> 2}, {{a -> 1}}], True];
+doTest[checkOptionsQ[{a -> 2, b -> 3}, {{a -> 1}}], True];
+doTest[checkOptionsQ[{a -> 2, b -> 3}, a -> 1], True];
+doTest[checkOptionsQ[{a -> 2}, {{a -> 1, b -> 3}}], False]; (* print an error *)
+doTest[checkOptionsQ[{a -> 2, b -> 3, a -> 4}, {{a -> 1}}], False]; (* print an error *)
+doTest[checkOptionsQ[{a -> 2, b -> 3}, {{a -> 1, a -> 2}}], False]; (* print an error *)
+
+
+(* ::Subchapter:: *)
+(*collectOptions[]*)
+
+
+<<SafeOptions`
+?collectOptions
+
+
+collectOptions[{},{}]
 
 
 (* ::Chapter:: *)
