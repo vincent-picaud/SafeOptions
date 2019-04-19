@@ -42,6 +42,10 @@ hasUniqueOptionQ::usage=
 "hasUniqueOptionQ[k_,opts:OptionsPattern[]] checks if option k->? is in allOptions. Caveat: returns false in cases of multi-occurences.";
 
 
+(* ::Subsection:: *)
+(*TODO: change arguments order! -> better coherence with other routines like filters etc...*)
+
+
 overwriteOptions::usage=
 "overwriteOptions[k_->v_,normalizedOptList_?normalizedOptionListQ] overwrite an already existing option in normalizedOptList.\n"<>
 "overwriteOptions[k_:>v_,normalizedOptList_?normalizedOptionListQ] overwrite an already existing option in normalizedOptList.\n"<>
@@ -77,11 +81,23 @@ collectOptions::usage=
 
 
 filterOptions::usage=
-"filterOptions[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] filters allowedOptions returning only those in opts. Equivalent to FilterRules[{opt},allowedOptions].";
+"filterOptions[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] filters allowedOptions returning only those in opts. Equivalent to FilterRules[{opt},allowedOptions]."<>
+"Example:\n"<>
+"Foo[opts:OptionsPattern]:=\n"<>
+"  Block[{},\n"<>
+"    subroutine[filterOptions[Options[subroutines],opts]];\n"<>
+"    ...\n"<>
+"];";
 
 
 retrieveOptions::usage=
-"retrieveOptions[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] TODO: not exactly filters";
+"retrieveOptions[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] compared to filter returns the whole allowedOptions taking into account potential modifications from opts."<>
+"Example:\n"<>
+"Foo[opts:OptionsPattern]:=\n"<>
+"  Block[{allOptions},\n"<>
+"    allOptions=retrieveOptions[Options[Foo],opts];\n"<>
+"    ...\n"<>
+"];";
 
 
 (* ::Chapter:: *)
@@ -178,11 +194,13 @@ filterOptions[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] :=
   ];
 
 
-(* TODO: to finish: compared to filter return allowedOptions, with potential modification from opts *)
+(* TODO: to finish: compared to filter returns the whole allowedOptions taking into account potential modifications from opts *)
 retrieveOptions[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]]:=
-Block[{},
-Assert[checkOptionsQ[allowedOptions,opts]];
-Return[filterOptions[allowedOptions,opts]];
+Block[{normalizedOpts},
+normalizedOpts = normalizeOptionPattern[opts];
+If[Not[checkOptionsQ[allowedOptions,normalizedOpts]],Return[$Failed]];
+(*Return[updateOptions[allowedOptions,normalizedOpts]];*)
+Return[updateOptions[normalizedOpts,allowedOptions]]
 ];
 
 
