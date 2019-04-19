@@ -76,17 +76,6 @@ collectOptions::usage=
 "collects all the option, generally used to create Options[foo]=collectOptions[...]";
 
 
-checkOptionsQ::usage=
-"checkOptionsQ[allowedOptions_?normalizedOptionListQ, opts:OptionPattern[]] \n"<>
-"checks that there is no duplicate key and that opts is a subset of allowedOptions.\n\n"<>
-"Example:\n"<>
-"Foo[opts:OptionsPattern]:=\n"<>
-"  Block[{},\n"<>
-"    Assert[checkOptionsQ[Options[foo],opts]];\n"<>
-"    ...\n"<>
-"];"
-
-
 filterOptions::usage=
 "filterOptions[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] filters allowedOptions returning only those in opts. Equivalent to FilterRules[{opt},allowedOptions].";
 
@@ -140,6 +129,16 @@ checkDuplicateFreeOptionsQ[allowedOptions_?normalizedOptionListQ] :=
       Return[True];
       ];
 
+
+checkOptionsQ::usage=
+"checkOptionsQ[allowedOptions_?normalizedOptionListQ, opts:OptionPattern[]] \n"<>
+"checks that there is no duplicate key and that opts is a subset of allowedOptions.\n\n"<>
+"Example:\n"<>
+"Foo[opts:OptionsPattern]:=\n"<>
+"  Block[{},\n"<>
+"    Assert[checkOptionsQ[Options[foo],opts]];\n"<>
+"    ...\n"<>
+"];"
 
 checkOptionsQ[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] :=
        Block[{normalizedOpts, normalizedOptKeys, allowedOptKeys},

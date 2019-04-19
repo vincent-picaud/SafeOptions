@@ -217,17 +217,17 @@ doTest[SafeOptions`Private`checkDuplicateFreeOptionsQ[{a->1,a->2}], False]; (* m
 
 
 <<SafeOptions`
-?checkOptionsQ
+?SafeOptions`Private`checkOptionsQ
 
 
-doTest[checkOptionsQ[{}], True];
-doTest[checkOptionsQ[{}, {{a -> 1}}], False]; (* note: must print an error message, do not worry :) *)
-doTest[checkOptionsQ[{a -> 2}, {{a -> 1}}], True];
-doTest[checkOptionsQ[{a -> 2, b -> 3}, {{a -> 1}}], True];
-doTest[checkOptionsQ[{a -> 2, b -> 3}, a -> 1], True];
-doTest[checkOptionsQ[{a -> 2}, {{a -> 1, b -> 3}}], False]; (* print an error *)
-doTest[checkOptionsQ[{a -> 2, b -> 3, a -> 4}, {{a -> 1}}], False]; (* print an error *)
-doTest[checkOptionsQ[{a -> 2, b -> 3}, {{a -> 1, a -> 2}}], False]; (* print an error *)
+doTest[SafeOptions`Private`checkOptionsQ[{}], True];
+doTest[SafeOptions`Private`checkOptionsQ[{}, {{a -> 1}}], False]; (* note: must print an error message, do not worry :) *)
+doTest[SafeOptions`Private`checkOptionsQ[{a -> 2}, {{a -> 1}}], True];
+doTest[SafeOptions`Private`checkOptionsQ[{a -> 2, b -> 3}, {{a -> 1}}], True];
+doTest[SafeOptions`Private`checkOptionsQ[{a -> 2, b -> 3}, a -> 1], True];
+doTest[SafeOptions`Private`checkOptionsQ[{a -> 2}, {{a -> 1, b -> 3}}], False]; (* print an error *)
+doTest[SafeOptions`Private`checkOptionsQ[{a -> 2, b -> 3, a -> 4}, {{a -> 1}}], False]; (* print an error *)
+doTest[SafeOptions`Private`checkOptionsQ[{a -> 2, b -> 3}, {{a -> 1, a -> 2}}], False]; (* print an error *)
 
 
 (* ::Subchapter:: *)
