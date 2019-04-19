@@ -38,14 +38,14 @@ doTest[f_, output_] := Block[{testResult},
 
 
 (* ::Subchapter:: *)
-(*Check that do Test works*)
+(*does it work?*)
 
 
 doTest[1,1];
 
 
 (* ::Subchapter:: *)
-(*Check normalize[]*)
+(*normalizeOptionPattern[]*)
 
 
 Options[foo] = {a -> 1};
@@ -60,6 +60,23 @@ doTest[foo[{{a -> 1}}], {a -> 1}];
 doTest[foo[a -> 1, b -> 2], {a -> 1, b -> 2}];
 doTest[foo[{a -> 1, b -> 2}], {a -> 1, b -> 2}];
 doTest[foo[{{a -> 1, b -> 2}}], {a -> 1, b -> 2}];
+
+
+(* ::Subchapter:: *)
+(*normalizedOptionList[]*)
+
+
+Need["SafeOptions`"];
+doTest[normalizedOptionList[1,2], False];
+doTest[normalizedOptionList[], False];
+doTest[normalizedOptionList[{}], True];
+doTest[normalizedOptionList[{{}}], False];
+doTest[normalizedOptionList[a -> 1], False];
+doTest[normalizedOptionList[{a -> 1}], True];
+doTest[normalizedOptionList[{{a -> 1}}], False];
+doTest[normalizedOptionList[a -> 1, b -> 2], False];
+doTest[normalizedOptionList[{a -> 1, b -> 2}], True];
+doTest[normalizedOptionList[{{a -> 1, b -> 2}}], False];
 
 
 (* ::Chapter:: *)

@@ -25,6 +25,10 @@ normalizeOptionPattern::usage=
 "normalizeOptionPattern[opts:OptionsPattern[]] turns options into an unified list representation";
 
 
+normalizedOptionListQ::usage=
+"normalizeOptionPattern[opts:OptionsPattern[]] test if opts is in the \"unified list representation\" form";
+
+
 (* ::Chapter:: *)
 (*Code*)
 
@@ -35,6 +39,16 @@ Begin["`Private`"];
 normalizeOptionPatternHelper[opts:((_->_)|(_:>_))...]:={opts};
 normalizeOptionPatternHelper[opts:{_ ...}]:=normalizeOptionPatternHelper[Apply[Sequence,opts]];
 normalizeOptionPattern[opts:OptionsPattern[]]:=normalizeOptionPatternHelper[opts];
+
+
+normalizedOptionListQ[x___]:=False;
+normalizedOptionListQ[{((_->_)|(_:>_))...}]:=True;
+
+
+overwriteOptions[(k_->v_),allOptions_?normalizedOptionListQ]:=Block[{},Assert[Cases[Keys@allOptions,k]=={k}];Return[(allOptions/.(k->_)->(k->v))]];
+overwriteOptions[(k_:>v_),allOptions_?normalizedOptionListQ]:=Block[{},Assert[Cases[Keys@allOptions,k]=={k}];Return[(allOptions/.(k:>_)->(k:>v))]];
+overwriteOptions[modifiedOptions_?normalizedOptionListQ,allOptions:{((_->_)|(_:>_))...}]:=Fold[overwriteOptions,allOptions,modifiedOptions];
+
 
 
 (* ::Input:: *)
@@ -64,17 +78,17 @@ normalizeOptionPattern[opts:OptionsPattern[]]:=normalizeOptionPatternHelper[opts
 (*If[SubsetQ[kAllOptions,kLocalOptions],Return[True],Message[SaferOptions::unknownOption,Complement[kLocalOptions,Intersection[kAllOptions,kLocalOptions]]];*)
 (*Return[False]];];*)
 (**)
-(*overwriteOptions[(k_->v_),allOptions:{((_->_)|(_:>_))..}]:=Block[{},Assert[Cases[Keys@allOptions,k]=={k}];Return[(allOptions/.(k->_)->(k->v))]];*)
-(*overwriteOptions[(k_:>v_),allOptions:{((_->_)|(_:>_))..}]:=Block[{},Assert[Cases[Keys@allOptions,k]=={k}];Return[(allOptions/.(k:>_)->(k:>v))]];*)
-(*overwriteOptions[modifiedOptions:{((_->_)|(_:>_))..},allOptions:{((_->_)|(_:>_))...}]:=Fold[overwriteOptions,allOptions,modifiedOptions];*)
+(*(*overwriteOptions[(k_->v_),allOptions_?normalizedOptionListQ]:=Block[{},Assert[Cases[Keys@allOptions,k]=={k}];Return[(allOptions/.(k->_)->(k->v))]];*)
+(*overwriteOptions[(k_:>v_),allOptions_?normalizedOptionListQ]:=Block[{},Assert[Cases[Keys@allOptions,k]=={k}];Return[(allOptions/.(k:>_)->(k:>v))]];*)
+(*overwriteOptions[modifiedOptions_?normalizedOptionListQ,allOptions:{((_->_)|(_:>_))...}]:=Fold[overwriteOptions,allOptions,modifiedOptions];*)*)
 (**)
 (*addOptions[(k_->v_),allOptions:{((_->_)|(_:>_))...}]:=Block[{},Assert[Cases[Keys@allOptions,k]=={}];Return[Append[allOptions,k->v]]];*)
 (*addOptions[(k_:>v_),allOptions:{((_->_)|(_:>_))...}]:=Block[{},Assert[Cases[Keys@allOptions,k]=={}];Return[Append[allOptions,k:>v]]];*)
-(*addOptions[modifiedOptions:{((_->_)|(_:>_))..},allOptions:{((_->_)|(_:>_))...}]:=Fold[addOptions,allOptions,modifiedOptions];*)
+(*addOptions[modifiedOptions_?normalizedOptionListQ,allOptions:{((_->_)|(_:>_))...}]:=Fold[addOptions,allOptions,modifiedOptions];*)
 (**)
 (*updateOptions[k_->v_,allOptions:{((_->_)|(_:>_))...}]:=If[MemberQ[Keys@allOptions,k],overwriteOptions[k->v,allOptions],addOptions[k->v,allOptions]];*)
 (*updateOptions[k_:>v_,allOptions:{((_->_)|(_:>_))...}]:=If[MemberQ[Keys@allOptions,k],overwriteOptions[k:>v,allOptions],addOptions[k:>v,allOptions]];*)
-(*updateOptions[modifiedOptions:{((_->_)|(_:>_))..},allOptions:{((_->_)|(_:>_))...}]:=Fold[updateOptions[#2,#1]&,allOptions,modifiedOptions];*)
+(*updateOptions[modifiedOptions_?normalizedOptionListQ,allOptions:{((_->_)|(_:>_))...}]:=Fold[updateOptions[#2,#1]&,allOptions,modifiedOptions];*)
 (**)
 
 
