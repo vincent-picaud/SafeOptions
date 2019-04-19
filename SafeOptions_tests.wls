@@ -100,10 +100,10 @@ doTest[normalizedOptionListQ[{{a -> 1, b -> 2}}], False];
 (*hasOptionQ[]*)
 
 
+<<SafeOptions`
 ?hasOptionQ
 
 
-<<SafeOptions`
 doTest[hasOptionQ[a], False];
 doTest[hasOptionQ[a,{}], False];
 doTest[hasOptionQ[a,{{}}], False];
@@ -111,19 +111,39 @@ doTest[hasOptionQ[a,a -> 1], True];
 doTest[hasOptionQ[a,{a -> 1}], True];
 doTest[hasOptionQ[a,{{a -> 1}}], True];
 doTest[hasOptionQ[a,a -> 1, b -> 2], True];
-doTest[hasOptionQ[a,a -> 1, b -> 2,a -> 3], False]; (* caveat *)
+doTest[hasOptionQ[a,a -> 1, b -> 2,a -> 3], True]; (* caveat: also see HasUniqueOptionQ[] *)
 doTest[hasOptionQ[a,{a -> 1, b -> 2}], True];
 doTest[hasOptionQ[a,{{a -> 1, b -> 2}}], True];
+
+
+(* ::Subchapter:: *)
+(*hasUniqueOptionQ[]*)
+
+
+<<SafeOptions`
+?hasUniqueOptionQ
+
+
+doTest[hasUniqueOptionQ[a], False];
+doTest[hasUniqueOptionQ[a,{}], False];
+doTest[hasUniqueOptionQ[a,{{}}], False];
+doTest[hasUniqueOptionQ[a,a -> 1], True];
+doTest[hasUniqueOptionQ[a,{a -> 1}], True];
+doTest[hasUniqueOptionQ[a,{{a -> 1}}], True];
+doTest[hasUniqueOptionQ[a,a -> 1, b -> 2], True];
+doTest[hasUniqueOptionQ[a,a -> 1, b -> 2,a -> 3], False]; (* caveat *)
+doTest[hasUniqueOptionQ[a,{a -> 1, b -> 2}], True];
+doTest[hasUniqueOptionQ[a,{{a -> 1, b -> 2}}], True];
 
 
 (* ::Subchapter:: *)
 (*overwriteOptions[]*)
 
 
+<<SafeOptions`
 ?overwriteOptions
 
 
-<<SafeOptions`
 doTest[overwriteOptions[c->3,1,2],overwriteOptions[c->3,1,2]];
 doTest[overwriteOptions[c->3], overwriteOptions[c->3]];
 doTest[Catch[overwriteOptions[c->3,{}]], $Failed];
@@ -152,6 +172,31 @@ doTest[addOptions[c -> 3, {{}}], addOptions[c -> 3, {{}}]];
 doTest[addOptions[c -> 3, a -> 1], addOptions[c -> 3, a -> 1]];
 doTest[Catch[addOptions[c -> 3, {c -> 1}]], $Failed];
 doTest[addOptions[c -> 3, {a -> 1, b -> 2}], {a -> 1, b -> 2, c -> 3}];
+
+
+(* ::Subchapter:: *)
+(*updateOptions[]*)
+
+
+<< SafeOptions`
+?updateOptions
+
+
+doTest[updateOptions[c -> 3, 1, 2], updateOptions[c -> 3, 1, 2]];
+doTest[updateOptions[c -> 3], updateOptions[c -> 3]];
+doTest[updateOptions[c -> 3, {{}}], updateOptions[c -> 3, {{}}]];
+doTest[updateOptions[c -> 3, a -> 1], updateOptions[c -> 3, a -> 1]];
+doTest[updateOptions[c -> 3, {a -> 1, c -> 2}], {a -> 1, c -> 3}];
+doTest[Catch[updateOptions[c -> 3, {a -> 1, c -> 2, c -> 4}]], $Failed];
+doTest[updateOptions[a -> A, {a -> 1, b -> {a -> 1}}], {a -> A, b -> {a -> 1}}];
+
+doTest[updateOptions[c -> 3, 1, 2], updateOptions[c -> 3, 1, 2]];
+doTest[updateOptions[c -> 3], updateOptions[c -> 3]];
+doTest[updateOptions[c -> 3, {}], {c -> 3}];
+doTest[updateOptions[c -> 3, {{}}], updateOptions[c -> 3, {{}}]];
+doTest[updateOptions[c -> 3, a -> 1], updateOptions[c -> 3, a -> 1]];
+doTest[updateOptions[c -> 3, {c -> 1}], { c -> 3}];
+doTest[updateOptions[c -> 3, {a -> 1, b -> 2}], {a -> 1, b -> 2, c -> 3}];
 
 
 (* ::Chapter:: *)
