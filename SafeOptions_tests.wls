@@ -34,7 +34,21 @@ doTest[f_, output_] := Block[{testResult},
 
 
 <<SafeOptions`
-(*?"SafeOptions`*"*)
+
+
+(* ::Text:: *)
+(*Required by Catch[...] to check expected Assert[] failures*)
+
+
+On[Assert]
+$AssertFunction=Throw[$Failed]&;
+
+
+(* ::Text:: *)
+(*User functions*)
+
+
+?"SafeOptions`*"
 
 
 (* ::Subchapter:: *)
@@ -94,6 +108,24 @@ doTest[hasOptionQ[a,a -> 1, b -> 2], True];
 doTest[hasOptionQ[a,a -> 1, b -> 2,a -> 3], False]; (* caveat *)
 doTest[hasOptionQ[a,{a -> 1, b -> 2}], True];
 doTest[hasOptionQ[a,{{a -> 1, b -> 2}}], True];
+
+
+(* ::Subchapter:: *)
+(*overwriteOptions[]*)
+
+
+<<SafeOptions`
+doTest[overwriteOptions[c->3,1,2],overwriteOptions[c->3,1,2]];
+doTest[overwriteOptions[c->3], overwriteOptions[c->3]];
+doTest[Catch[overwriteOptions[c->3,{}]], $Failed];
+doTest[overwriteOptions[c->3,{{}}], overwriteOptions[c->3,{{}}]];
+doTest[overwriteOptions[c->3,a -> 1],overwriteOptions[c->3,a -> 1]];
+doTest[Catch[overwriteOptions[c->3,{a -> 1}]], $Failed];
+doTest[overwriteOptions[c->3,{a -> 1,c->2}], {a->1,c->3}];
+doTest[Catch[overwriteOptions[c->3,{a -> 1,c->2,c->4}]], $Failed];
+doTest[overwriteOptions[a->A,{a -> 1,b->{a->1}}], {a->A,b->{a->1}}];
+doTest[overwriteOptions[a->A,{a -> 1,b->{a->1}},3], {a->A,b->{a->A}}];
+doTest[overwriteOptions[a->A,{a -> 1,b->{a->1}},{3}], {a->1,b->{a->A}}];
 
 
 (* ::Chapter:: *)
