@@ -63,20 +63,37 @@ doTest[foo[{{a -> 1, b -> 2}}], {a -> 1, b -> 2}];
 
 
 (* ::Subchapter:: *)
-(*normalizedOptionList[]*)
+(*normalizedOptionListQ[]*)
 
 
-Need["SafeOptions`"];
-doTest[normalizedOptionList[1,2], False];
-doTest[normalizedOptionList[], False];
-doTest[normalizedOptionList[{}], True];
-doTest[normalizedOptionList[{{}}], False];
-doTest[normalizedOptionList[a -> 1], False];
-doTest[normalizedOptionList[{a -> 1}], True];
-doTest[normalizedOptionList[{{a -> 1}}], False];
-doTest[normalizedOptionList[a -> 1, b -> 2], False];
-doTest[normalizedOptionList[{a -> 1, b -> 2}], True];
-doTest[normalizedOptionList[{{a -> 1, b -> 2}}], False];
+<<SafeOptions`
+doTest[normalizedOptionListQ[1,2], False];
+doTest[normalizedOptionListQ[], False];
+doTest[normalizedOptionListQ[{}], True];
+doTest[normalizedOptionListQ[{{}}], False];
+doTest[normalizedOptionListQ[a -> 1], False];
+doTest[normalizedOptionListQ[{a -> 1}], True];
+doTest[normalizedOptionListQ[{{a -> 1}}], False];
+doTest[normalizedOptionListQ[a -> 1, b -> 2], False];
+doTest[normalizedOptionListQ[{a -> 1, b -> 2}], True];
+doTest[normalizedOptionListQ[{{a -> 1, b -> 2}}], False];
+
+
+(* ::Subchapter:: *)
+(*hasOption[]*)
+
+
+<<SafeOptions`
+doTest[hasOptionQ[a], False];
+doTest[hasOptionQ[a,{}], False];
+doTest[hasOptionQ[a,{{}}], False];
+doTest[hasOptionQ[a,a -> 1], True];
+doTest[hasOptionQ[a,{a -> 1}], True];
+doTest[hasOptionQ[a,{{a -> 1}}], True];
+doTest[hasOptionQ[a,a -> 1, b -> 2], True];
+doTest[hasOptionQ[a,a -> 1, b -> 2,a -> 3], False]; (* caveat *)
+doTest[hasOptionQ[a,{a -> 1, b -> 2}], True];
+doTest[hasOptionQ[a,{{a -> 1, b -> 2}}], True];
 
 
 (* ::Chapter:: *)
