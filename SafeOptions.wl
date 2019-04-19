@@ -26,7 +26,7 @@ normalizeOptionPattern::usage=
 
 
 normalizedOptionListQ::usage=
-"normalizeOptionPattern[opts:OptionsPattern[]] test if opts is in the \"unified list representation\" form.";
+"normalizeOptionPattern[opts:OptionsPattern[]] tests if opts is in the \"unified list representation\" form.";
 
 
 hasOptionQ::usage=
@@ -37,11 +37,22 @@ overwriteOptions::usage=
 "overwriteOptions[k_->v_,normalizedOptList_?normalizedOptionListQ] overwrite an already existing option in normalizedOptList.\n"<>
 "overwriteOptions[k_:>v_,normalizedOptList_?normalizedOptionListQ] overwrite an already existing option in normalizedOptList.\n"<>
 "overwriteOptions[modifiedOptions_?normalizedOptionListQ,normalizedOptList_?normalizedOptionListQ] overwrite a list of already existing options in normalizedOptList.\n\n"<>
-"Example: by default only the first level is affected\n\n"<>
+"Example: (by default only the first level is affected)\n"<>
 "overwriteOptions[a\[Rule]A,{a -> 1,b\[Rule]{a\[Rule]1}}]\n"<>
 "{a\[Rule]A,b\[Rule]{a\[Rule]1}}\n\n"<>
 "overwriteOptions[a\[Rule]A,{a -> 1,b\[Rule]{a\[Rule]1}},{3}]\n"<>
 "{a\[Rule]1,b\[Rule]{a\[Rule]A}}";
+
+
+addOptions::usage=
+"addOptions[k_->v_,normalizedOptList_?normalizedOptionListQ] adds an option at the end of normalizedOptList.\n"<>
+"addOptions[k_:>v_,normalizedOptList_?normalizedOptionListQ] adds an option at the end of normalizedOptList.\n"<>
+"addOptions[modifiedOptions_?normalizedOptionListQ,normalizedOptList_?normalizedOptionListQ] adds options at the end of normalizedOptList.\n\n"<>
+"Example:\n"<>
+"addOptions[a\[Rule]1,{b -> 2}]\n"<>
+"{b\[Rule]2,a\[Rule]1}\n\n"<>
+"caveat: if the option already exists an Assert[False] occurs\n"<>
+"addOptions[a\[Rule]1,{a -> 2}]"
 
 
 (* ::Chapter:: *)
@@ -66,6 +77,11 @@ hasOptionQ[k_,allOptions:OptionsPattern[]]:=Cases[Keys@normalizeOptionPattern[al
 overwriteOptions[k_->v_,normalizedOptList_?normalizedOptionListQ,levelSpec_:1]:=Block[{},Assert[hasOptionQ[k,normalizedOptList]];Return[Replace[normalizedOptList,(k->_)->(k->v),levelSpec]]];
 overwriteOptions[k_:>v_,normalizedOptList_?normalizedOptionListQ,levelSpec_:1]:=Block[{},Assert[hasOptionQ[k,normalizedOptList]];Return[Replace[normalizedOptList,(k:>_)->(k:>v),levelSpec]]];
 overwriteOptions[modifiedOptions_?normalizedOptionListQ,normalizedOptList_?normalizedOptionListQ,levelSpec_:{1}]:=Fold[overwriteOptions[#2,#1,levelSpec]&,normalizedOptList,modifiedOptions];
+
+
+addOptions[k_->v_,normalizedOptList_?normalizedOptionListQ]:=Block[{},Assert[!hasOptionQ[k,normalizedOptList]];Return[Append[normalizedOptList,k->v]]];
+addOptions[k_:>v_,normalizedOptList_?normalizedOptionListQ]:=Block[{},Assert[!hasOptionQ[k,normalizedOptList]];Return[Append[normalizedOptList,k:>v]]];
+addOptions[addedOptions_?normalizedOptionListQ,normalizedOptList_?normalizedOptionListQ]:=Fold[addOptions[#2,#1]&,normalizedOptList,addedOptions];
 
 
 (* ::Input:: *)
@@ -99,9 +115,9 @@ overwriteOptions[modifiedOptions_?normalizedOptionListQ,normalizedOptList_?norma
 (*overwriteOptions[(k_:>v_),allOptions_?normalizedOptionListQ]:=Block[{},Assert[hasOptionQ[k,allOptions]];Return[(allOptions/.(k:>_)->(k:>v))]];*)
 (*overwriteOptions[modifiedOptions_?normalizedOptionListQ,allOptions:{((_->_)|(_:>_))...}]:=Fold[overwriteOptions,allOptions,modifiedOptions];*)*)
 (**)
-(*addOptions[(k_->v_),normalizedOptList_?normalizedOptionListQ]:=Block[{},Assert[!hasOptionQ[k,normalizedOptList]];Return[Append[normalizedOptList,k->v]]];*)
+(*(*addOptions[(k_->v_),normalizedOptList_?normalizedOptionListQ]:=Block[{},Assert[!hasOptionQ[k,normalizedOptList]];Return[Append[normalizedOptList,k->v]]];*)
 (*addOptions[(k_:>v_),normalizedOptList_?normalizedOptionListQ]:=Block[{},Assert[!hasOptionQ[k,normalizedOptList]];Return[Append[normalizedOptList,k:>v]]];*)
-(*addOptions[modifiedOptions_?normalizedOptionListQ,normalizedOptList_?normalizedOptionListQ]:=Fold[addOptions,normalizedOptList,modifiedOptions];*)
+(*addOptions[modifiedOptions_?normalizedOptionListQ,normalizedOptList_?normalizedOptionListQ]:=Fold[addOptions,normalizedOptList,modifiedOptions];*)*)
 (**)
 (*updateOptions[k_->v_,normalizedOptList_?normalizedOptionListQ]:=If[MemberQ[Keys@normalizedOptList,k],overwriteOptions[k->v,normalizedOptList],addOptions[k->v,normalizedOptList]];*)
 (*updateOptions[k_:>v_,normalizedOptList_?normalizedOptionListQ]:=If[MemberQ[Keys@normalizedOptList,k],overwriteOptions[k:>v,normalizedOptList],addOptions[k:>v,normalizedOptList]];*)
