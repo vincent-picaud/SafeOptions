@@ -203,6 +203,16 @@ doTest[updateOptions[c -> 3, {a -> 1, b -> 2}], {a -> 1, b -> 2, c -> 3}];
 
 
 (* ::Subchapter:: *)
+(*SaferOptions`Private`checkDuplicateFreeOptionsQ[]*)
+
+
+doTest[SafeOptions`Private`checkDuplicateFreeOptionsQ[{}], True];
+doTest[SafeOptions`Private`checkDuplicateFreeOptionsQ[{a->1}], True];
+doTest[SafeOptions`Private`checkDuplicateFreeOptionsQ[{a->1,b->2}], True];
+doTest[SafeOptions`Private`checkDuplicateFreeOptionsQ[{a->1,a->2}], False]; (* must print error msg *)
+
+
+(* ::Subchapter:: *)
 (*checkOptionsQ[]*)
 
 
@@ -218,6 +228,25 @@ doTest[checkOptionsQ[{a -> 2, b -> 3}, a -> 1], True];
 doTest[checkOptionsQ[{a -> 2}, {{a -> 1, b -> 3}}], False]; (* print an error *)
 doTest[checkOptionsQ[{a -> 2, b -> 3, a -> 4}, {{a -> 1}}], False]; (* print an error *)
 doTest[checkOptionsQ[{a -> 2, b -> 3}, {{a -> 1, a -> 2}}], False]; (* print an error *)
+
+
+(* ::Subchapter:: *)
+(*filterOptions[]*)
+
+
+<<SafeOptions`
+?filterOptions
+
+
+doTest[filterOptions[{}], {}];
+doTest[filterOptions[{},{}], {}];
+doTest[filterOptions[{a->1},{}], {}];
+doTest[filterOptions[{a->1},{a->2}], {a->2}];
+doTest[filterOptions[{},{a->2}], {}];
+doTest[filterOptions[{b->3},{a->2}], {}];
+doTest[filterOptions[{a->1,b->3},{a->2,b->4}], {a->2,b->4}];
+doTest[Catch[filterOptions[{a->1,b->3,a->2},{a->2,b->4}]], $Failed]; (* must print error msg *)
+doTest[Catch[filterOptions[{a->1,b->3},{a->2,b->4,a->2}]], $Failed]; (* must print error msg *)
 
 
 (* ::Subchapter:: *)

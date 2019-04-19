@@ -21,6 +21,9 @@ SaferOptions::cannotAddAndIgnore="Cannot add and ignore in the same times these 
 (*Options*)
 
 
+optionsToIgnore::usage="An option that takes the form of a (delayed)rules { ((_->_)|(_:>_))... }. Used by collectOptions[...]."
+
+
 (* ::Chapter:: *)
 (*User functions*)
 
@@ -84,6 +87,14 @@ checkOptionsQ::usage=
 "];"
 
 
+filterOptions::usage=
+"filterOptions[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] filters allowedOptions returning only those in opts. Equivalent to FilterRules[{opt},allowedOptions].";
+
+
+retrieveOptions::usage=
+"retrieveOptions[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] TODO: not exactly filters";
+
+
 (* ::Chapter:: *)
 (*Code*)
 
@@ -119,12 +130,15 @@ updateOptions[k_:>v_,normalizedOptList_?normalizedOptionListQ]:=If[hasOptionQ[k,
 updateOptions[modifiedOptions_?normalizedOptionListQ,normalizedOptList_?normalizedOptionListQ]:=Fold[updateOptions[#2,#1]&,normalizedOptList,modifiedOptions];
 
 
-Options[collectOptions]={ignoreOptions->{}}; (* TODO public *)
-
-collectOptions[addedOptions_?normalizedOptionListQ,previousOptions:{{_ ...}..},opts:OptionsPattern[]]:=
-Block[{},
-Return[{1,opts}];
-] /; Apply[And,Map[normalizedOptionListQ,previousOptions]]
+checkDuplicateFreeOptionsQ[allowedOptions_?normalizedOptionListQ] :=
+  Block[{keys},
+   keys = Keys[allowedOptions];
+     If[Not[DuplicateFreeQ[keys]],
+       Message[SaferOptions::duplicateOptions, Select[Tally[keys], (Last@# > 1) &][[All, 1]]];
+       Return[False];
+       ];
+      Return[True];
+      ];
 
 
 checkOptionsQ[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] :=
@@ -132,7 +146,7 @@ checkOptionsQ[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] :=
            normalizedOpts = normalizeOptionPattern[opts];
            normalizedOptKeys = Keys[normalizedOpts];
            allowedOptKeys = Keys[allowedOptions];
-           
+           (* TODO use checkDuplicateFreeOptionsQ & make checkOptionsQ private *)
            If[Not[DuplicateFreeQ[normalizedOptKeys]],
              Message[SaferOptions::duplicateOptions, Select[Tally[normalizedOptKeys], (Last@# > 1) &][[All, 1]]];
              Return[False];
@@ -152,8 +166,39 @@ checkOptionsQ[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] :=
             ];
 
 
+(* Note: compared to FilterRules[...] the arguiment order is reversed,
+,* however this is on purpose as full benefice of "opts:OptionsPattern[]" impose to
+,* put this pattern at the end
+,*)
+filterOptions[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] :=
+  Block[{normalizedOpts},
+            If[Not[checkDuplicateFreeOptionsQ[allowedOptions]], Return[$Failed]];
+            normalizedOpts = normalizeOptionPattern[opts];
+            If[Not[checkDuplicateFreeOptionsQ[normalizedOpts]], Return[$Failed]];
+      Return[FilterRules[normalizedOpts, allowedOptions]];
+  ];
+
+
+(* TODO: to finish: compared to filter return allowedOptions, with potential modification from opts *)
+retrieveOptions[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]]:=
+Block[{},
+Assert[checkOptionsQ[allowedOptions,opts]];
+Return[filterOptions[allowedOptions,opts]];
+];
+
+
+Options[collectOptions]={optionToIgnore->{}}; 
+
+collectOptions[addedOptions_?normalizedOptionListQ,previousOptions:{{_ ...}..},opts:OptionsPattern[]]:=
+Block[{normalizedOptions},
+If[Not[checkOptionsQ[Options[collectOptions],opts]],Return[$Failed]];
+
+Return[{1,opts}];
+] /; Apply[And,Map[normalizedOptionListQ,previousOptions]]
+
+
 (* ::Input:: *)
-(*completeOptions[addedOptions:?Subscript[normalizedOptionListQ, \[Placeholder]]{((_->_)|(_:>_))...},ignoredKeys:{(_Symbol|_String)...}:{},previousOptions:{{((_->_)|(_:>_))...}..}]:=Block[{addedKeys,forwardedOptions,incompatible},addedKeys=Keys[addedOptions];*)
+(*completeOptions[addedOptions:{((_->_)|(_:>_))...},ignoredKeys:{(_Symbol|_String)...}:{},previousOptions:{{((_->_)|(_:>_))...}..}]:=Block[{addedKeys,forwardedOptions,incompatible},addedKeys=Keys[addedOptions];*)
 (*forwardedOptions=Intersection[addedKeys,ignoredKeys];(*forwardedOptions=temporary*)If[forwardedOptions!={},Message[SaferOptions::cannotAddAndIgnore,forwardedOptions];*)
 (*Return[$Failed];];*)
 (*forwardedOptions=Flatten[previousOptions];*)
