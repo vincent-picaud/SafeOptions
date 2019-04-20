@@ -116,8 +116,9 @@ normalizedOptionListQ[x___]:=False;
 normalizedOptionListQ[{((_->_)|(_:>_))...}]:=True;
 
 
-hasOptionQ[k_,allOptions:OptionsPattern[]]:=MemberQ[Keys@normalizeOptionPattern[allOptions],k];
-hasUniqueOptionQ[k_,allOptions:OptionsPattern[]]:=Cases[Keys@normalizeOptionPattern[allOptions],k]=={k};
+hasOptionHelper[k_,allOptions:OptionsPattern[]]:=Count[normalizeOptionPattern[allOptions],k->_]
+hasOptionQ[k_,allOptions:OptionsPattern[]]:=hasOptionHelper[k,allOptions]>=1;
+hasUniqueOptionQ[k_,allOptions:OptionsPattern[]]:=hasOptionHelper[k,allOptions]==1;
 
 
 overwriteOptions[k_->v_,normalizedOptList_?normalizedOptionListQ,levelSpec_:1]:=Block[{},Assert[hasUniqueOptionQ[k,normalizedOptList]];Return[Replace[normalizedOptList,(k->_)->(k->v),levelSpec]]];
@@ -194,7 +195,6 @@ filterOptions[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] :=
   ];
 
 
-(* TODO: to finish: compared to filter returns the whole allowedOptions taking into account potential modifications from opts *)
 retrieveOptions[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]]:=
 Block[{normalizedOpts},
 normalizedOpts = normalizeOptionPattern[opts];
