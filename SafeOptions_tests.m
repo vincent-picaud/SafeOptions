@@ -280,7 +280,15 @@ doTest[Catch[retrieveOptions[{a->1,b->3},{a->2,b->4,a->2}]], $Failed]; (* must p
 ?collectOptions
 
 
-collectOptions[{},{}]
+doTest[Catch[collectOptions[{},{}]],{}];
+doTest[Catch[collectOptions[{a->1},{{}},optionsToIgnore->{}]],$Failed]; (* SaferOptions::unknownOptions: *)
+doTest[Catch[collectOptions[{a->1},{{}},optionKeysToIgnore->{a}]],,$Failed]; (*SaferOptions::cannotAddAndIgnore: *)
+doTest[Catch[collectOptions[{a->1},{{}},optionKeysToIgnore->{b}]], {a->1}]; 
+doTest[Catch[collectOptions[{a->1},{{}},optionKeysToIgnore->{}]], {a->1}]; 
+
+
+(* ::Subchapter:: *)
+(**)
 
 
 (* ::Chapter:: *)
@@ -288,3 +296,13 @@ collectOptions[{},{}]
 
 
 TestReport[allTests]
+
+
+<<SafeOptions`
+collectOptions[{a->1},{{}},optionsToIgnore->{b}]
+
+
+
+
+
+

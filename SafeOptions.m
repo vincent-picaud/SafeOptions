@@ -13,6 +13,9 @@ SaferOptions::unknownOptions = "Unknown options `1`";
 SaferOptions::duplicateOptions = "Duplicate options `1`";
 
 
+SaferOptions::notNormalized="Options `1` are not in a normalized form.";
+
+
 SaferOptions::incompatibleOptions="Some options are incompatibles `1`";
 SaferOptions::cannotAddAndIgnore="Cannot add and ignore in the same times these options: `1`";
 
@@ -21,7 +24,7 @@ SaferOptions::cannotAddAndIgnore="Cannot add and ignore in the same times these 
 (*Options*)
 
 
-optionsToIgnore::usage="An option that takes the form of a (delayed)rules { ((_->_)|(_:>_))... }. Used by collectOptions[...]."
+optionKeysToIgnore::usage="An option that takes the form of a (delayed)rules { ((_->_)|(_:>_))... }. Used by collectOptions[...]."
 
 
 (* ::Chapter:: *)
@@ -116,6 +119,13 @@ normalizedOptionListQ[x___]:=False;
 normalizedOptionListQ[{((_->_)|(_:>_))...}]:=True;
 
 
+checkNormalizedOptionListQ[x___] :=
+  If[normalizedOptionListQ[x], Return[True],
+   Message[SaferOptions::notNormalized, x];
+   Return[False];
+   ];
+
+
 hasOptionHelper[k_,allOptions:OptionsPattern[]]:=Count[normalizeOptionPattern[allOptions],k->_]
 hasOptionQ[k_,allOptions:OptionsPattern[]]:=hasOptionHelper[k,allOptions]>=1;
 hasUniqueOptionQ[k_,allOptions:OptionsPattern[]]:=hasOptionHelper[k,allOptions]==1;
@@ -195,32 +205,54 @@ filterOptions[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] :=
   ];
 
 
-retrieveOptions[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]]:=
-Block[{normalizedOpts},
-normalizedOpts = normalizeOptionPattern[opts];
-If[Not[checkOptionsQ[allowedOptions,normalizedOpts]],Return[$Failed]];
+retrieveOptions[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] :=
+  Block[{normalizedOpts},
+   normalizedOpts = normalizeOptionPattern[opts];
+   If[Not[checkOptionsQ[allowedOptions, normalizedOpts]], Return[$Failed]];
+   Return[updateOptions[normalizedOpts, allowedOptions]]
+   ];
 
-Return[updateOptions[normalizedOpts,allowedOptions]]
-];
+
+checkAddVsIgnoreQ[addedOptKeys_List, ignoredOptKeys_List] :=
+      Block[{commonKeys},
+         commonKeys = Intersection[addedOptKeys, ignoredOptKeys];
+         If[commonKeys == {},
+            Return[True],
+            Message[SaferOptions::cannotAddAndIgnore, commonKeys];
+            Return[False]
+            ];
+         ];
 
 
-Options[collectOptions]={optionToIgnore->{}}; 
+Options[collectOptions] = {optionKeysToIgnore -> {}}; 
 
-collectOptions[addedOptions_?normalizedOptionListQ,previousOptions:{{_ ...}..},opts:OptionsPattern[]]:=
-Block[{normalizedOptions},
-If[Not[checkOptionsQ[Options[collectOptions],opts]],Return[$Failed]];
+collectOptions[addedOptions_?normalizedOptionListQ, previousOptions : {{_ ...} ..}, opts : OptionsPattern[]] :=
+     Block[{addedOptKeys, safeOpts, ignoredOptKeys, forwardedOptions},
+               safeOpts = retrieveOptions[Options[collectOptions], opts];
+               ignoredOptKeys = optionKeysToIgnore /. safeOpts;
+               addedOptKeys = Keys[addedOptions];
+               Assert[checkAddVsIgnoreQ[addedOptKeys, ignoredOptKeys]];
+      
+       forwardedOptions = Flatten[previousOptions];
+      forwardedOptions = Select[forwardedOptions, Not[MemberQ[ignoredOptKeys, Keys[#]]] &];
+      forwardedOptions = Select[forwardedOptions, Not[MemberQ[addedOptKeys, Keys[#]]] &];
+      forwardedOptions = DeleteDuplicates[forwardedOptions];
+      
+   (*TODO: must check incompatible options *)
+      Return[Join[addedOptions, forwardedOptions]];
+   ] /; Apply[And, Map[normalizedOptionListQ, previousOptions]]
 
-Return[{1,opts}];
-] /; Apply[And,Map[normalizedOptionListQ,previousOptions]]
+collectOptions[addedOptions_?normalizedOptionListQ, previousOptions_?normalizedOptionListQ, opts : OptionsPattern[]] :=
+           collectOptions[addedOptions, {previousOptions}, opts];
 
 
 (* ::Input:: *)
-(*completeOptions[addedOptions:{((_->_)|(_:>_))...},ignoredKeys:{(_Symbol|_String)...}:{},previousOptions:{{((_->_)|(_:>_))...}..}]:=Block[{addedKeys,forwardedOptions,incompatible},addedKeys=Keys[addedOptions];*)
-(*forwardedOptions=Intersection[addedKeys,ignoredKeys];(*forwardedOptions=temporary*)If[forwardedOptions!={},Message[SaferOptions::cannotAddAndIgnore,forwardedOptions];*)
+(*completeOptions[addedOptions:{((_->_)|(_:>_))...},ignoredKeys:{(_Symbol|_String)...}:{},previousOptions:{{((_->_)|(_:>_))...}..}]:=Block[{addedOptKeys,forwardedOptions,incompatible},addedOptKeys=Keys[addedOptions];*)
+(*forwardedOptions=Intersection[addedOptKeys,ignoredKeys];(*forwardedOptions=temporary*)If[forwardedOptions!={},Message[SaferOptions::cannotAddAndIgnore,forwardedOptions];*)
 (*Return[$Failed];];*)
 (*forwardedOptions=Flatten[previousOptions];*)
 (*forwardedOptions=Select[forwardedOptions,(!MemberQ[ignoredKeys,Keys[#]])&];*)
-(*forwardedOptions=Select[forwardedOptions,(!MemberQ[addedKeys,Keys[#]])&];*)
+(*forwardedOptions=Select[forwardedOptions,(!MemberQ[addedOptKeys,Keys[#]])&];*)
 (*forwardedOptions=DeleteDuplicates[forwardedOptions];*)
 (*If[!DuplicateFreeQ[Keys[forwardedOptions]],incompatible=Select[Tally[Keys[forwardedOptions]],(#[[2]]>1)&][[All,1]];*)
 (*incompatible=Select[forwardedOptions,MemberQ[incompatible,Keys[#]]&];*)
