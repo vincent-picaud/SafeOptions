@@ -50,6 +50,10 @@ $AssertFunction=Throw[$Failed]&;
 ?"SafeOptions`*"
 
 
+(* ::Print:: *)
+(*PaneSelector[{False -> RowBox[{OpenerBox[Dynamic[Typeset`open$$], ImageSize -> Small], ErrorBox["SafeOptions`"]}], True -> GridBox[{{RowBox[{OpenerBox[Dynamic[Typeset`open$$], ImageSize -> Small], ErrorBox["SafeOptions`"]}]}, {GridBox[{{ButtonBox["addOptions", BaseStyle -> "InformationLink", ButtonData :> {"Info3764791612-6331364", {"addOptions", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["filterOptions", BaseStyle -> "InformationLink", ButtonData :> {"Info3764791612-6331364", {"filterOptions", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["hasUniqueOptionQ", BaseStyle -> "InformationLink", ButtonData :> {"Info3764791612-6331364", {"hasUniqueOptionQ", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["normalizedOptionListQ", BaseStyle -> "InformationLink", ButtonData :> {"Info3764791612-6331364", {"normalizedOptionListQ", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["optionKeysToIgnore", BaseStyle -> "InformationLink", ButtonData :> {"Info3764791612-6331364", {"optionKeysToIgnore", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["getOptions", BaseStyle -> "InformationLink", ButtonData :> {"Info3764791612-6331364", {"retrieveOptions", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["updateOptions", BaseStyle -> "InformationLink", ButtonData :> {"Info3764791612-6331364", {"updateOptions", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"]}, {ButtonBox["collectOptions", BaseStyle -> "InformationLink", ButtonData :> {"Info3764791612-6331364", {"collectOptions", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["hasOptionQ", BaseStyle -> "InformationLink", ButtonData :> {"Info3764791612-6331364", {"hasOptionQ", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["ignoreOption", BaseStyle -> "InformationLink", ButtonData :> {"Info3764791612-6331364", {"ignoreOption", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["normalizeOptionPattern", BaseStyle -> "InformationLink", ButtonData :> {"Info3764791612-6331364", {"normalizeOptionPattern", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["overwriteOptions", BaseStyle -> "InformationLink", ButtonData :> {"Info3764791612-6331364", {"overwriteOptions", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["SaferOptions", BaseStyle -> "InformationLink", ButtonData :> {"Info3764791612-6331364", {"SaferOptions", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ""}}, DefaultBaseStyle -> "InfoGrid", GridBoxItemSize -> {"Columns" -> {{Scaled[0.1357142857142857]}}}]}}]}, Dynamic[Typeset`open$$], ImageSize -> Automatic]*)
+
+
 Clear[a];Clear[A];
 Clear[b];
 Clear[c];
@@ -254,22 +258,22 @@ doTest[Catch[filterOptions[{a->1,b->3},{a->2,b->4,a->2}]], $Failed]; (* must pri
 
 
 (* ::Subchapter:: *)
-(*retrieveOptions[]*)
+(*getOptions[]*)
 
 
 <<SafeOptions`
-?retrieveOptions
+?getOptions
 
 
-doTest[retrieveOptions[{}], {}];
-doTest[retrieveOptions[{},{}], {}];
-doTest[retrieveOptions[{a->1},{}], {a->1}];
-doTest[retrieveOptions[{a->1},{a->2}], {a->2}];
-doTest[retrieveOptions[{},{a->2}], $Failed];
-doTest[retrieveOptions[{b->3},{a->2}], $Failed];
-doTest[retrieveOptions[{a->1,b->3},{a->2,b->4}], {a->2,b->4}];
-doTest[Catch[retrieveOptions[{a->1,b->3,a->2},{a->2,b->4}]], $Failed]; (* must print error msg *)
-doTest[Catch[retrieveOptions[{a->1,b->3},{a->2,b->4,a->2}]], $Failed]; (* must print error msg *)
+doTest[getOptions[{}], {}];
+doTest[getOptions[{},{}], {}];
+doTest[getOptions[{a->1},{}], {a->1}];
+doTest[getOptions[{a->1},{a->2}], {a->2}];
+doTest[getOptions[{},{a->2}], $Failed];
+doTest[getOptions[{b->3},{a->2}], $Failed];
+doTest[getOptions[{a->1,b->3},{a->2,b->4}], {a->2,b->4}];
+doTest[Catch[getOptions[{a->1,b->3,a->2},{a->2,b->4}]], $Failed]; (* must print error msg *)
+doTest[Catch[getOptions[{a->1,b->3},{a->2,b->4,a->2}]], $Failed]; (* must print error msg *)
 
 
 (* ::Subchapter:: *)
@@ -280,15 +284,15 @@ doTest[Catch[retrieveOptions[{a->1,b->3},{a->2,b->4,a->2}]], $Failed]; (* must p
 ?collectOptions
 
 
-doTest[Catch[collectOptions[{},{}]],{}];
+doTest[collectOptions[{},{}],{}];
 doTest[Catch[collectOptions[{a->1},{{}},optionsToIgnore->{}]],$Failed]; (* SaferOptions::unknownOptions: *)
-doTest[Catch[collectOptions[{a->1},{{}},optionKeysToIgnore->{a}]],,$Failed]; (*SaferOptions::cannotAddAndIgnore: *)
-doTest[Catch[collectOptions[{a->1},{{}},optionKeysToIgnore->{b}]], {a->1}]; 
-doTest[Catch[collectOptions[{a->1},{{}},optionKeysToIgnore->{}]], {a->1}]; 
-
-
-(* ::Subchapter:: *)
-(**)
+doTest[Catch[collectOptions[{a->1},{{}},optionKeysToIgnore->{a}]],$Failed]; (* SaferOptions::cannotAddAndIgnore: *)
+doTest[collectOptions[{a->1},{{}},optionKeysToIgnore->{b}], {a->1}]; 
+doTest[collectOptions[{a->1},{{}},optionKeysToIgnore->{}], {a->1}]; 
+doTest[collectOptions[{a->1},{{b->2},{c->3}},optionKeysToIgnore->{}],{a->1,b->2,c->3} ]; 
+doTest[collectOptions[{a->1},{{b->2},{c->3}},optionKeysToIgnore->{b}],{a->1,c->3} ]; 
+doTest[collectOptions[{a->1},{{b->2},{b->3}},optionKeysToIgnore->{b}],{a->1} ]; (* even if incompatible b opts, this is ok as b is ignored *)
+doTest[Catch[collectOptions[{a->1},{{b->2},{b->3}},optionKeysToIgnore->{}]],$Failed ]; 
 
 
 (* ::Chapter:: *)
