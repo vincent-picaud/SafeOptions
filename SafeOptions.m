@@ -199,7 +199,7 @@ retrieveOptions[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]]:
 Block[{normalizedOpts},
 normalizedOpts = normalizeOptionPattern[opts];
 If[Not[checkOptionsQ[allowedOptions,normalizedOpts]],Return[$Failed]];
-(*Return[updateOptions[allowedOptions,normalizedOpts]];*)
+
 Return[updateOptions[normalizedOpts,allowedOptions]]
 ];
 

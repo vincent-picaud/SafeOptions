@@ -265,8 +265,8 @@ doTest[retrieveOptions[{}], {}];
 doTest[retrieveOptions[{},{}], {}];
 doTest[retrieveOptions[{a->1},{}], {a->1}];
 doTest[retrieveOptions[{a->1},{a->2}], {a->2}];
-doTest[retrieveOptions[{},{a->2}], {}];
-doTest[retrieveOptions[{b->3},{a->2}], {}];
+doTest[retrieveOptions[{},{a->2}], $Failed];
+doTest[retrieveOptions[{b->3},{a->2}], $Failed];
 doTest[retrieveOptions[{a->1,b->3},{a->2,b->4}], {a->2,b->4}];
 doTest[Catch[retrieveOptions[{a->1,b->3,a->2},{a->2,b->4}]], $Failed]; (* must print error msg *)
 doTest[Catch[retrieveOptions[{a->1,b->3},{a->2,b->4,a->2}]], $Failed]; (* must print error msg *)
