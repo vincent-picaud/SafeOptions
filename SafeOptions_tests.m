@@ -50,10 +50,6 @@ $AssertFunction=Throw[$Failed]&;
 ?"SafeOptions`*"
 
 
-(* ::Print:: *)
-(*PaneSelector[{False -> RowBox[{OpenerBox[Dynamic[Typeset`open$$], ImageSize -> Small], ErrorBox["SafeOptions`"]}], True -> GridBox[{{RowBox[{OpenerBox[Dynamic[Typeset`open$$], ImageSize -> Small], ErrorBox["SafeOptions`"]}]}, {GridBox[{{ButtonBox["addOptions", BaseStyle -> "InformationLink", ButtonData :> {"Info3764791612-6331364", {"addOptions", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["filterOptions", BaseStyle -> "InformationLink", ButtonData :> {"Info3764791612-6331364", {"filterOptions", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["hasUniqueOptionQ", BaseStyle -> "InformationLink", ButtonData :> {"Info3764791612-6331364", {"hasUniqueOptionQ", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["normalizedOptionListQ", BaseStyle -> "InformationLink", ButtonData :> {"Info3764791612-6331364", {"normalizedOptionListQ", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["optionKeysToIgnore", BaseStyle -> "InformationLink", ButtonData :> {"Info3764791612-6331364", {"optionKeysToIgnore", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["getOptions", BaseStyle -> "InformationLink", ButtonData :> {"Info3764791612-6331364", {"retrieveOptions", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["updateOptions", BaseStyle -> "InformationLink", ButtonData :> {"Info3764791612-6331364", {"updateOptions", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"]}, {ButtonBox["collectOptions", BaseStyle -> "InformationLink", ButtonData :> {"Info3764791612-6331364", {"collectOptions", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["hasOptionQ", BaseStyle -> "InformationLink", ButtonData :> {"Info3764791612-6331364", {"hasOptionQ", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["ignoreOption", BaseStyle -> "InformationLink", ButtonData :> {"Info3764791612-6331364", {"ignoreOption", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["normalizeOptionPattern", BaseStyle -> "InformationLink", ButtonData :> {"Info3764791612-6331364", {"normalizeOptionPattern", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["overwriteOptions", BaseStyle -> "InformationLink", ButtonData :> {"Info3764791612-6331364", {"overwriteOptions", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["SaferOptions", BaseStyle -> "InformationLink", ButtonData :> {"Info3764791612-6331364", {"SaferOptions", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ""}}, DefaultBaseStyle -> "InfoGrid", GridBoxItemSize -> {"Columns" -> {{Scaled[0.1357142857142857]}}}]}}]}, Dynamic[Typeset`open$$], ImageSize -> Automatic]*)
-
-
 Clear[a];Clear[A];
 Clear[b];
 Clear[c];
@@ -302,11 +298,40 @@ doTest[Catch[collectOptions[{a->1},{{b->2},{b->3}},optionKeysToIgnore->{}]],$Fai
 TestReport[allTests]
 
 
-<<SafeOptions`
-collectOptions[{a->1},{{}},optionsToIgnore->{b}]
+(* ::Chapter:: *)
+(*Demo*)
 
 
+Options[foo1] = {a -> 1, b -> 2};
+
+foo1[arg__, opts : OptionsPattern[]] := 
+   Print["foo1 a=", OptionValue[a], " b=", OptionValue[b]]; 
+
+Options[foo2] = {b -> -2};
+
+foo2[arg__, opts : OptionsPattern[]] := 
+   Print["foo2 b=", OptionValue[b]];
 
 
+Options[foo3] = collectOptions[{a -> 10, b -> 1, c -> 4}, Options /@ {foo1, foo2}];
+
+foo3[opts : OptionsPattern[]] :=      
+  Block[{safeOpts = getOptions[Options[foo3],opts]},
+   foo1[1, 2,filterOptions[Options[foo1],safeOpts]]; 
+   foo2[4, 5,filterOptions[Options[foo2],safeOpts]];
+  ];
 
 
+foo3[a->2,b->3]
+
+
+Options[foo3] = collectOptions[{a -> 10, c -> 4}, Options /@ {foo1, foo2}];
+
+foo3[opts : OptionsPattern[]] :=      
+  Block[{safeOpts = getOptions[Options[foo3],opts]},
+   foo1[1, 2,filterOptions[Options[foo1],safeOpts]]; 
+   foo2[4, 5,filterOptions[Options[foo2],safeOpts]];
+  ];
+
+
+Off[Assert]
