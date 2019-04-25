@@ -24,7 +24,7 @@ SaferOptions::cannotAddAndIgnore="Cannot add and ignore in the same times these 
 (*Options*)
 
 
-optionKeysToIgnore::usage="An option that takes the form of a (delayed)rules { ((_->_)|(_:>_))... }. Used by collectOptions[...].";
+optionKeysToIgnore::usage="An option that takes the form of a (delayed)rules { ((_->_)|(_:>_))... }. Used by createOptionList[...].";
 
 
 (* ::Chapter:: *)
@@ -78,9 +78,9 @@ updateOptions::usage=
 "checks if the option k is already defined and switch to the right addOptions[...] or updateOptions[...] functions according to the test result.";
 
 
-ignoreOption::usage="An option to defined ignored option list (used in collectOptions[...])";
-collectOptions::usage=
-"collects all the option, generally used to create Options[foo]=collectOptions[...]";
+ignoreOption::usage="An option to defined ignored option list (used in createOptionList[...])";
+createOptionList::usage=
+"collects all the option, generally used to create Options[foo]=createOptionList[...]";
 
 
 filterOptions::usage=
@@ -93,12 +93,12 @@ filterOptions::usage=
 "];";
 
 
-getOptions::usage=
-"getOptions[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] compared to filter returns the whole allowedOptions taking into account potential modifications from opts."<>
+getOptionList::usage=
+"getOptionList[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] compared to filter returns the whole allowedOptions taking into account potential modifications from opts."<>
 "Example:\n"<>
 "Foo[opts:OptionsPattern]:=\n"<>
 "  Block[{allOptions},\n"<>
-"    allOptions=getOptions[Options[Foo],opts];\n"<>
+"    allOptions=getOptionList[Options[Foo],opts];\n"<>
 "    ...\n"<>
 "];";
 
@@ -171,10 +171,10 @@ filterOptions[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] :=
 
 
 (* ::Subchapter:: *)
-(*getOptions*)
+(*getOptionList*)
 
 
-checkGetOptionsQ[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] :=
+checkgetOptionListQ[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] :=
         Block[{normalizedOpts, normalizedOptKeys, allowedOptKeys},
               normalizedOpts = normalizeOptionPattern[opts];
               
@@ -193,16 +193,16 @@ checkGetOptionsQ[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]]
         ];
 
 
-getOptions[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] :=
+getOptionList[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] :=
         Block[{normalizedOpts},
-              If[Not[checkGetOptionsQ[allowedOptions, opts]],Return[$Failed]];
+              If[Not[checkgetOptionListQ[allowedOptions, opts]],Return[$Failed]];
               normalizedOpts = normalizeOptionPattern[opts];
               Return[updateOptions[normalizedOpts, allowedOptions]]
         ];
 
 
 (* ::Subchapter:: *)
-(*collectOptions*)
+(*createOptionList*)
 
 
 checkAddVsIgnoreQ[addedOptKeys_List, ignoredOptKeys_List] :=
@@ -229,11 +229,11 @@ checkIncompatibleOptionsQ[forwardedOptions_?normalizedOptionListQ] :=
         ];
 
 
-Options[collectOptions] = {optionKeysToIgnore -> {}}; 
+Options[createOptionList] = {optionKeysToIgnore -> {}}; 
 
-collectOptions[addedOptions_?normalizedOptionListQ, inheritedOptions : {{_ ...} ..}, opts : OptionsPattern[]] :=
+createOptionList[addedOptions_?normalizedOptionListQ, inheritedOptions : {{_ ...} ..}, opts : OptionsPattern[]] :=
         Block[{addedOptKeys, safeOpts, ignoredOptKeys, forwardedOptions},
-              safeOpts = getOptions[Options[collectOptions], opts];
+              safeOpts = getOptionList[Options[createOptionList], opts];
               ignoredOptKeys = optionKeysToIgnore /. safeOpts;
               addedOptKeys = Keys[addedOptions];
               Assert[checkAddVsIgnoreQ[addedOptKeys, ignoredOptKeys]];
@@ -248,8 +248,8 @@ collectOptions[addedOptions_?normalizedOptionListQ, inheritedOptions : {{_ ...} 
               Return[Join[addedOptions, forwardedOptions]];
         ] /; Apply[And, Map[normalizedOptionListQ, inheritedOptions]]
 
-collectOptions[addedOptions_?normalizedOptionListQ, inheritedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] :=
-        collectOptions[addedOptions, {inheritedOptions}, opts];
+createOptionList[addedOptions_?normalizedOptionListQ, inheritedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] :=
+        createOptionList[addedOptions, {inheritedOptions}, opts];
 
 
 End[]; (* private *)
