@@ -155,12 +155,12 @@ doTest[hasUniqueOptionQ[{{a -> 1, b -> 2}},a], hasUniqueOptionQ[{{a -> 1, b -> 2
 
 doTest[overwriteOptions[c->3,1,2],overwriteOptions[c->3,1,2]];
 doTest[overwriteOptions[c->3], overwriteOptions[c->3]];
-doTest[Catch[overwriteOptions[{},c->3]], $Failed];
+doTest[overwriteOptions[{},c->3], $Failed];
 doTest[overwriteOptions[c->3,{{}}], overwriteOptions[c->3,{{}}]];
 doTest[overwriteOptions[c->3,a -> 1],overwriteOptions[c->3,a -> 1]];
-doTest[Catch[overwriteOptions[{a -> 1},c->3]], $Failed];
+doTest[overwriteOptions[{a -> 1},c->3], $Failed];
 doTest[overwriteOptions[{a -> 1,c->2},c->3], {a->1,c->3}];
-doTest[Catch[overwriteOptions[{a -> 1,c->2,c->4},c->3]], $Failed];
+doTest[overwriteOptions[{a -> 1,c->2,c->4},c->3], $Failed];
 doTest[overwriteOptions[{a -> 1,b->{a->1}},a->A], {a->A,b->{a->1}}];
 doTest[overwriteOptions[{a -> 1,b->{a->1}},a->A,3], {a->A,b->{a->A}}];
 doTest[overwriteOptions[{a -> 1,b->{a->1}},a->A,{3}], {a->1,b->{a->A}}];
@@ -251,8 +251,8 @@ doTest[filterOptions[{a->1},{a->2}], {a->2}];
 doTest[filterOptions[{},{a->2}], {}];
 doTest[filterOptions[{b->3},{a->2}], {}];
 doTest[filterOptions[{a->1,b->3},{a->2,b->4}], {a->2,b->4}];
-doTest[Catch[filterOptions[{a->1,b->3,a->2},{a->2,b->4}]], $Failed]; (* must print error msg *)
-doTest[Catch[filterOptions[{a->1,b->3},{a->2,b->4,a->2}]], $Failed]; (* must print error msg *)
+doTest[filterOptions[{a->1,b->3,a->2},{a->2,b->4}], $Failed]; (* must print error msg *)
+doTest[filterOptions[{a->1,b->3},{a->2,b->4,a->2}], $Failed]; (* must print error msg *)
 
 
 (* ::Subchapter:: *)
@@ -270,8 +270,8 @@ doTest[getOptionList[{a->1},{a->2}], {a->2}];
 doTest[getOptionList[{},{a->2}], $Failed];
 doTest[getOptionList[{b->3},{a->2}], $Failed];
 doTest[getOptionList[{a->1,b->3},{a->2,b->4}], {a->2,b->4}];
-doTest[Catch[getOptionList[{a->1,b->3,a->2},{a->2,b->4}]], $Failed]; (* must print error msg *)
-doTest[Catch[getOptionList[{a->1,b->3},{a->2,b->4,a->2}]], $Failed]; (* must print error msg *)
+doTest[getOptionList[{a->1,b->3,a->2},{a->2,b->4}], $Failed]; (* must print error msg *)
+doTest[getOptionList[{a->1,b->3},{a->2,b->4,a->2}], $Failed]; (* must print error msg *)
 
 
 (* ::Subchapter:: *)
@@ -283,14 +283,14 @@ doTest[Catch[getOptionList[{a->1,b->3},{a->2,b->4,a->2}]], $Failed]; (* must pri
 
 
 doTest[createOptionList[{},{}],{}];
-doTest[Catch[createOptionList[{a->1},{{}},optionsToIgnore->{}]],$Failed]; (* SaferOptions::unknownOptions: *)
-doTest[Catch[createOptionList[{a->1},{{}},optionKeysToIgnore->{a}]],$Failed]; (* SaferOptions::cannotAddAndIgnore: *)
+doTest[createOptionList[{a->1},{{}},optionsToIgnore->{}],$Failed]; (* SaferOptions::unknownOptions: *)
+doTest[createOptionList[{a->1},{{}},optionKeysToIgnore->{a}],$Failed]; (* SaferOptions::cannotAddAndIgnore: *)
 doTest[createOptionList[{a->1},{{}},optionKeysToIgnore->{b}], {a->1}]; 
 doTest[createOptionList[{a->1},{{}},optionKeysToIgnore->{}], {a->1}]; 
 doTest[createOptionList[{a->1},{{b->2},{c->3}},optionKeysToIgnore->{}],{a->1,b->2,c->3} ]; 
 doTest[createOptionList[{a->1},{{b->2},{c->3}},optionKeysToIgnore->{b}],{a->1,c->3} ]; 
 doTest[createOptionList[{a->1},{{b->2},{b->3}},optionKeysToIgnore->{b}],{a->1} ]; (* even if incompatible b opts, this is ok as b is ignored *)
-doTest[Catch[createOptionList[{a->1},{{b->2},{b->3}},optionKeysToIgnore->{}]],$Failed ]; 
+doTest[createOptionList[{a->1},{{b->2},{b->3}},optionKeysToIgnore->{}],$Failed ]; 
 
 
 (* ::Chapter:: *)
@@ -339,4 +339,4 @@ foo3[opts : OptionsPattern[]] :=
 createOptionList[{a -> 10, c -> 4}, Options /@ {foo1, foo2}]
 
 
-Off[Assert]
+

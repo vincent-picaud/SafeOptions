@@ -244,16 +244,19 @@ Options[createOptionList] = {optionKeysToIgnore -> {}};
 createOptionList[addedOptions_?normalizedOptionListQ, inheritedOptions : {{_ ...} ..}, opts : OptionsPattern[]] :=
         Block[{addedOptKeys, safeOpts, ignoredOptKeys, forwardedOptions},
               safeOpts = getOptionList[Options[createOptionList], opts];
+              If[safeOpts===$Failed,Return[$Failed]];
               ignoredOptKeys = optionKeysToIgnore /. safeOpts;
               addedOptKeys = Keys[addedOptions];
-              Assert[checkAddVsIgnoreQ[addedOptKeys, ignoredOptKeys]];
+              If[Not[checkAddVsIgnoreQ[addedOptKeys, ignoredOptKeys]],
+              Return[$Failed]];
               
               forwardedOptions = Flatten[inheritedOptions];
               forwardedOptions = Select[forwardedOptions, Not[MemberQ[ignoredOptKeys, Keys[#]]] &];
               forwardedOptions = Select[forwardedOptions, Not[MemberQ[addedOptKeys, Keys[#]]] &]; (* added options always overwrite inherited options *)
               forwardedOptions = DeleteDuplicates[forwardedOptions];
               
-              Assert[checkIncompatibleOptionsQ[forwardedOptions]];
+              If[Not[checkIncompatibleOptionsQ[forwardedOptions]],
+              Return[$Failed]];
               
               Return[Join[addedOptions, forwardedOptions]];
         ] /; Apply[And, Map[normalizedOptionListQ, inheritedOptions]]
