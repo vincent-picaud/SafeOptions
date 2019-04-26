@@ -83,6 +83,28 @@ foo3[a->5] (* ok for a, but error prone... here we forgot b *)
 (*- we systematically use a normalized representation for option set (thanks to the normalizeOptionPattern[] function)*)
 
 
+<<SafeOptions`
+?"SafeOptions`*"
+
+
+(* ::Text:: *)
+(*The general pattern to use this package is :*)
+
+
+Options[foo3] = createOptionList[{a -> 10, b -> 1, c -> 4}, Options /@ {foo1, foo2}];
+
+foo3[opts : OptionsPattern[]] :=      
+  Block[{safeOpts = getOptionList[Options[foo3],opts]},
+   If[safeOpts===$Failed,Return[$Failed]];
+   foo1[1, 2,filterOptionList[Options[foo1],safeOpts]]; 
+   foo2[4, 5,filterOptionList[Options[foo2],safeOpts]];
+  ];
+
+
+(* ::Text:: *)
+(*(See below for further details)*)
+
+
 (* ::Subchapter:: *)
 (*OptionPattern is very permissive: solution use normalizeOptionPattern[]*)
 
@@ -100,7 +122,7 @@ foo[{{{a->1,b->2}}}]
 
 
 (* ::Text:: *)
-(*using normalized representation simplifies further processings*)
+(*using normalized representation simplifies further processing*)
 
 
 foo[k_Symbol,opts:OptionsPattern[]]:=MemberQ[Keys[normalizeOptionPattern[opts]],k]
@@ -112,12 +134,12 @@ foo[a,{{a->1,b->2}}]   (* No more problem *)
 foo[a,a->1,b->2]       (* No more problem *)
 
 
-(* ::Chapter:: *)
-(*Reuse foo1, foo2 with MMA's option system*)
+(* ::Subchapter:: *)
+(*Safer option management use: createOptionList[], getOptionList[], filterOptionList[]*)
 
 
-(* ::Section:: *)
-(*Foo1 & 2*)
+(* ::Text:: *)
+(*An example reusing  foo1, foo2 with MMA's option system*)
 
 
 Options[foo1] = {a -> 1, b -> 2};
@@ -131,43 +153,32 @@ foo2[arg__, opts : OptionsPattern[]] :=
    Print["foo2 b=", OptionValue[b]];
 
 
-(* ::Section:: *)
-(*Foo3 use SaferOptions system*)
+(* ::Text:: *)
+(*Now Foo3 use SaferOptions system*)
 
 
 Options[foo3] = createOptionList[{a -> 10, b -> 1, c -> 4}, Options /@ {foo1, foo2}];
 
 foo3[opts : OptionsPattern[]] :=      
   Block[{safeOpts = getOptionList[Options[foo3],opts]},
+   If[safeOpts===$Failed,Return[$Failed]];
    foo1[1, 2,filterOptionList[Options[foo1],safeOpts]]; 
    foo2[4, 5,filterOptionList[Options[foo2],safeOpts]];
   ];
 
 
 (* ::Text:: *)
-(*Default option values are forwarded*)
+(*Default option values are forwarded:*)
 
 
 foo3[]
 
 
 (* ::Text:: *)
-(*You can safely provide their values*)
+(*Obviously, you can still explicitly provide their values*)
 
 
-foo3[a->2,b->3]
-
-
-(* ::Subchapter:: *)
-(*The createOptionList[] function*)
-
-
-?createOptionList
-Options[createOptionList]
-
-
-(* ::Subsection:: *)
-(*Incompatible values*)
+foo3[a->5]
 
 
 (* ::Text:: *)
@@ -182,13 +193,6 @@ Options[foo3] = createOptionList[{a -> 10, c -> 4}, Options /@ {foo1, foo2}]
 
 
 Options[foo3] = createOptionList[{a -> 10, b->1,c -> 4}, Options /@ {foo1, foo2}]
-
-
-foo3[]
-
-
-(* ::Subsection:: *)
-(*Ignored option*)
 
 
 (* ::Text:: *)
@@ -206,10 +210,11 @@ foo3[]
 
 
 (* ::Text:: *)
-(*Note: you can not use ignored option!*)
+(*Note: you can not use ignored options nor undefined ones:*)
 
 
 foo3[a->3]
+foo3[d->3]
 
 
 (* ::Text:: *)
@@ -219,22 +224,50 @@ foo3[a->3]
 Options[foo3] = createOptionList[{a -> 10, b->1,c -> 4}, Options /@ {foo1, foo2},optionKeysToIgnore->{a}]
 
 
-Options[createOptionList]
+(* ::Section:: *)
+(*Another example where foo1 & foo2 also use SafeOptions package*)
 
 
-Options[foo3] = createOptionList[{a -> 10, c -> 4}, Options /@ {foo1, foo2}];
+Options[foo1] = createOptionList[{a -> 1, b -> 2}];
+
+foo1[arg__, opts : OptionsPattern[]] := 
+Block[{safeOpts = getOptionList[Options[foo1],opts]},
+   If[safeOpts===$Failed,Return[$Failed]];
+   Print["foo1 a=", optionValue[safeOpts,a], " b=", optionValue[safeOpts,b]]; 
+   ];
+
+Options[foo2] = createOptionList[{b -> -2}];
+
+foo2[arg__, opts : OptionsPattern[]] := 
+ Block[{safeOpts = getOptionList[Options[foo2],opts]},
+   If[safeOpts===$Failed,Return[$Failed]];
+   Print["foo2 b=", optionValue[safeOpts,b]];
+   ];
+
+
+(* ::Text:: *)
+(*foo3 is defined as before:*)
+
+
+Options[foo3] = createOptionList[{a -> 10, b -> 1, c -> 4}, Options /@ {foo1, foo2}];
 
 foo3[opts : OptionsPattern[]] :=      
   Block[{safeOpts = getOptionList[Options[foo3],opts]},
+   If[safeOpts===$Failed,Return[$Failed]];
    foo1[1, 2,filterOptionList[Options[foo1],safeOpts]]; 
    foo2[4, 5,filterOptionList[Options[foo2],safeOpts]];
   ];
 
 
-createOptionList[{a -> 10, c -> 4}, Options /@ {foo1, foo2}]
+(* ::Text:: *)
+(*foo3 works as before*)
 
 
+foo3[]
 
 
+foo3[a->5]
 
 
+(* ::Text:: *)
+(*etc.*)

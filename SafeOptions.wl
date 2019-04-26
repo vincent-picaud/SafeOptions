@@ -266,7 +266,10 @@ createOptionList[addedOptions_?normalizedOptionListQ, inheritedOptions : {{_ ...
         ] /; Apply[And, Map[normalizedOptionListQ, inheritedOptions]]
 
 createOptionList[addedOptions_?normalizedOptionListQ, inheritedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] :=
-        createOptionList[addedOptions, {inheritedOptions}, opts];
+    createOptionList[addedOptions, {inheritedOptions}, opts];
+        
+createOptionList[addedOptions_?normalizedOptionListQ]:=
+	createOptionList[addedOptions, {}];
 
 
 optionValue[allowedOptions_?normalizedOptionListQ, k_Symbol]:=
