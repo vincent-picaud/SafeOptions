@@ -50,10 +50,6 @@ $AssertFunction=Throw[$Failed]&;
 ?"SafeOptions`*"
 
 
-(* ::Print:: *)
-(*PaneSelector[{False -> RowBox[{OpenerBox[Dynamic[Typeset`open$$], ImageSize -> Small], ErrorBox["SafeOptions`"]}], True -> GridBox[{{RowBox[{OpenerBox[Dynamic[Typeset`open$$], ImageSize -> Small], ErrorBox["SafeOptions`"]}]}, {GridBox[{{ButtonBox["addOptions", BaseStyle -> "InformationLink", ButtonData :> {"Info3765209402-2411872", {"addOptions", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["filterOptions", BaseStyle -> "InformationLink", ButtonData :> {"Info3765209402-2411872", {"filterOptions", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["hasOptionQ", BaseStyle -> "InformationLink", ButtonData :> {"Info3765209402-2411872", {"hasOptionQ", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["ignoreOption", BaseStyle -> "InformationLink", ButtonData :> {"Info3765209402-2411872", {"ignoreOption", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["normalizeOptionPattern", BaseStyle -> "InformationLink", ButtonData :> {"Info3765209402-2411872", {"normalizeOptionPattern", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["overwriteOptions", BaseStyle -> "InformationLink", ButtonData :> {"Info3765209402-2411872", {"overwriteOptions", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["updateOptions", BaseStyle -> "InformationLink", ButtonData :> {"Info3765209402-2411872", {"updateOptions", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"]}, {ButtonBox["createOptionList", BaseStyle -> "InformationLink", ButtonData :> {"Info3765209402-2411872", {"collectOptions", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["getOptionList", BaseStyle -> "InformationLink", ButtonData :> {"Info3765209402-2411872", {"getOptions", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["hasUniqueOptionQ", BaseStyle -> "InformationLink", ButtonData :> {"Info3765209402-2411872", {"hasUniqueOptionQ", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["normalizedOptionListQ", BaseStyle -> "InformationLink", ButtonData :> {"Info3765209402-2411872", {"normalizedOptionListQ", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["optionKeysToIgnore", BaseStyle -> "InformationLink", ButtonData :> {"Info3765209402-2411872", {"optionKeysToIgnore", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["SaferOptions", BaseStyle -> "InformationLink", ButtonData :> {"Info3765209402-2411872", {"SaferOptions", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ""}}, DefaultBaseStyle -> "InfoGrid", GridBoxItemSize -> {"Columns" -> {{Scaled[0.1357142857142857]}}}]}}]}, Dynamic[Typeset`open$$], ImageSize -> Automatic]*)
-
-
 Clear[a];Clear[A];
 Clear[b];
 Clear[c];
@@ -115,16 +111,17 @@ doTest[normalizedOptionListQ[{{a -> 1, b -> 2}}], False];
 ?hasOptionQ
 
 
-doTest[hasOptionQ[a], False];
-doTest[hasOptionQ[a,{}], False];
-doTest[hasOptionQ[a,{{}}], False];
-doTest[hasOptionQ[a,a -> 1], True];
-doTest[hasOptionQ[a,{a -> 1}], True];
-doTest[hasOptionQ[a,{{a -> 1}}], True];
-doTest[hasOptionQ[a,a -> 1, b -> 2], True];
-doTest[hasOptionQ[a,a -> 1, b -> 2,a -> 3], True]; (* caveat: also see HasUniqueOptionQ[] *)
-doTest[hasOptionQ[a,{a -> 1, b -> 2}], True];
-doTest[hasOptionQ[a,{{a -> 1, b -> 2}}], True];
+doTest[hasOptionQ[a], hasOptionQ[a]];
+doTest[hasOptionQ[{},a], False];
+doTest[hasOptionQ[{{}},a], hasOptionQ[{{}},a]];
+doTest[hasOptionQ[a->1,a], hasOptionQ[a->1,a]];
+doTest[hasOptionQ[{a -> 1},a], True];
+doTest[hasOptionQ[{{a -> 1}},a], hasOptionQ[{{a -> 1}},a]];
+doTest[hasOptionQ[a -> 1, b -> 2,a],hasOptionQ[a -> 1, b -> 2,a]];
+doTest[hasOptionQ[a -> 1, b -> 2,a -> 3,a], hasOptionQ[a -> 1, b -> 2,a -> 3,a]]; (* caveat: also see HasUniqueOptionQ[] *)
+doTest[hasOptionQ[{a -> 1, b -> 2},a], True];
+doTest[hasOptionQ[{a -> 1, b -> 2,a -> 1},a], True];
+doTest[hasOptionQ[{{a -> 1, b -> 2}},a], hasOptionQ[{{a -> 1, b -> 2}},a]];
 
 
 (* ::Subchapter:: *)
@@ -135,16 +132,17 @@ doTest[hasOptionQ[a,{{a -> 1, b -> 2}}], True];
 ?hasUniqueOptionQ
 
 
-doTest[hasUniqueOptionQ[a], False];
-doTest[hasUniqueOptionQ[a,{}], False];
-doTest[hasUniqueOptionQ[a,{{}}], False];
-doTest[hasUniqueOptionQ[a,a -> 1], True];
-doTest[hasUniqueOptionQ[a,{a -> 1}], True];
-doTest[hasUniqueOptionQ[a,{{a -> 1}}], True];
-doTest[hasUniqueOptionQ[a,a -> 1, b -> 2], True];
-doTest[hasUniqueOptionQ[a,a -> 1, b -> 2,a -> 3], False]; (* caveat *)
-doTest[hasUniqueOptionQ[a,{a -> 1, b -> 2}], True];
-doTest[hasUniqueOptionQ[a,{{a -> 1, b -> 2}}], True];
+doTest[hasUniqueOptionQ[a],hasUniqueOptionQ[a]];
+doTest[hasUniqueOptionQ[{},a], False];
+doTest[hasUniqueOptionQ[{{}},a], hasUniqueOptionQ[{{}},a]];
+doTest[hasUniqueOptionQ[a -> 1,a], hasUniqueOptionQ[a -> 1,a]];
+doTest[hasUniqueOptionQ[{a -> 1},a], True];
+doTest[hasUniqueOptionQ[{{a -> 1}},a], hasUniqueOptionQ[{{a -> 1}},a]];
+doTest[hasUniqueOptionQ[a -> 1, b -> 2,a], hasUniqueOptionQ[a -> 1, b -> 2,a]];
+doTest[hasUniqueOptionQ[a -> 1, b -> 2,a -> 3,a], hasUniqueOptionQ[a -> 1, b -> 2,a -> 3,a]]; 
+doTest[hasUniqueOptionQ[{a -> 1, b -> 2},a], True];
+doTest[hasUniqueOptionQ[{a -> 1, b -> 2,a -> 1},a], False]; (* caveat *)
+doTest[hasUniqueOptionQ[{{a -> 1, b -> 2}},a], hasUniqueOptionQ[{{a -> 1, b -> 2}},a]];
 
 
 (* ::Subchapter:: *)
