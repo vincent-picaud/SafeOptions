@@ -57,6 +57,10 @@ $AssertFunction=Throw[$Failed]&;
 ?"SafeOptions`*"
 
 
+(* ::Print:: *)
+(*PaneSelector[{False -> RowBox[{OpenerBox[Dynamic[Typeset`open$$], ImageSize -> Small], ErrorBox["SafeOptions`"]}], True -> GridBox[{{RowBox[{OpenerBox[Dynamic[Typeset`open$$], ImageSize -> Small], ErrorBox["SafeOptions`"]}]}, {GridBox[{{ButtonBox["appendOptions", BaseStyle -> "InformationLink", ButtonData :> {"Info1863765272179-6151880", {"appendOptions", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["filterOptionList", BaseStyle -> "InformationLink", ButtonData :> {"Info1863765272179-6151880", {"filterOptions", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["hasOptionQ", BaseStyle -> "InformationLink", ButtonData :> {"Info1863765272179-6151880", {"hasOptionQ", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["ignoreOption", BaseStyle -> "InformationLink", ButtonData :> {"Info1863765272179-6151880", {"ignoreOption", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["normalizeOptionPattern", BaseStyle -> "InformationLink", ButtonData :> {"Info1863765272179-6151880", {"normalizeOptionPattern", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["overwriteOptions", BaseStyle -> "InformationLink", ButtonData :> {"Info1863765272179-6151880", {"overwriteOptions", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["updateOptions", BaseStyle -> "InformationLink", ButtonData :> {"Info1863765272179-6151880", {"updateOptions", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"]}, {ButtonBox["createOptionList", BaseStyle -> "InformationLink", ButtonData :> {"Info1863765272179-6151880", {"createOptionList", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["getOptionList", BaseStyle -> "InformationLink", ButtonData :> {"Info1863765272179-6151880", {"getOptionList", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["hasUniqueOptionQ", BaseStyle -> "InformationLink", ButtonData :> {"Info1863765272179-6151880", {"hasUniqueOptionQ", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["normalizedOptionListQ", BaseStyle -> "InformationLink", ButtonData :> {"Info1863765272179-6151880", {"normalizedOptionListQ", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["optionKeysToIgnore", BaseStyle -> "InformationLink", ButtonData :> {"Info1863765272179-6151880", {"optionKeysToIgnore", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ButtonBox["SaferOptions", BaseStyle -> "InformationLink", ButtonData :> {"Info1863765272179-6151880", {"SaferOptions", "SafeOptions`"}}, ButtonNote -> "SafeOptions`"], ""}}, DefaultBaseStyle -> "InfoGrid", GridBoxItemSize -> {"Columns" -> {{Scaled[0.1357142857142857]}}}]}}]}, Dynamic[Typeset`open$$], ImageSize -> Automatic]*)
+
+
 Clear[a];Clear[A];
 Clear[b];
 Clear[c];
@@ -226,40 +230,39 @@ doTest[SafeOptions`Private`checkDuplicateFreeOptionsQ[{a->1,a->2}], False,{Safer
 
 
 (* ::Subchapter:: *)
-(*checkgetOptionListQ[]*)
+(*checkGetOptionListQ[]*)
 
 
 <<SafeOptions`
-?SafeOptions`Private`checkgetOptionListQ
 
 
-doTest[SafeOptions`Private`checkgetOptionListQ[{}], True];
-doTest[SafeOptions`Private`checkgetOptionListQ[{}, {{a -> 1}}], False,{SaferOptions::unknownOptions}]; 
-doTest[SafeOptions`Private`checkgetOptionListQ[{a -> 2}, {{a -> 1}}], True];
-doTest[SafeOptions`Private`checkgetOptionListQ[{a -> 2, b -> 3}, {{a -> 1}}], True];
-doTest[SafeOptions`Private`checkgetOptionListQ[{a -> 2, b -> 3}, a -> 1], True];
-doTest[SafeOptions`Private`checkgetOptionListQ[{a -> 2}, {{a -> 1, b -> 3}}], False,{SaferOptions::unknownOptions}];
-doTest[SafeOptions`Private`checkgetOptionListQ[{a -> 2, b -> 3, a -> 4}, {{a -> 1}}], False,{SaferOptions::duplicateOptions}];
-doTest[SafeOptions`Private`checkgetOptionListQ[{a -> 2, b -> 3}, {{a -> 1, a -> 2}}], False,{SaferOptions::duplicateOptions}]; 
+doTest[SafeOptions`Private`checkGetOptionListQ[{}], True];
+doTest[SafeOptions`Private`checkGetOptionListQ[{}, {{a -> 1}}], False,{SaferOptions::unknownOptions}]; 
+doTest[SafeOptions`Private`checkGetOptionListQ[{a -> 2}, {{a -> 1}}], True];
+doTest[SafeOptions`Private`checkGetOptionListQ[{a -> 2, b -> 3}, {{a -> 1}}], True];
+doTest[SafeOptions`Private`checkGetOptionListQ[{a -> 2, b -> 3}, a -> 1], True];
+doTest[SafeOptions`Private`checkGetOptionListQ[{a -> 2}, {{a -> 1, b -> 3}}], False,{SaferOptions::unknownOptions}];
+doTest[SafeOptions`Private`checkGetOptionListQ[{a -> 2, b -> 3, a -> 4}, {{a -> 1}}], False,{SaferOptions::duplicateOptions}];
+doTest[SafeOptions`Private`checkGetOptionListQ[{a -> 2, b -> 3}, {{a -> 1, a -> 2}}], False,{SaferOptions::duplicateOptions}]; 
 
 
 (* ::Subchapter:: *)
-(*filterOptions[]*)
+(*filterOptionList[]*)
 
 
 <<SafeOptions`
-?filterOptions
+?filterOptionList
 
 
-doTest[filterOptions[{}], {}];
-doTest[filterOptions[{},{}], {}];
-doTest[filterOptions[{a->1},{}], {}];
-doTest[filterOptions[{a->1},{a->2}], {a->2}];
-doTest[filterOptions[{},{a->2}], {}];
-doTest[filterOptions[{b->3},{a->2}], {}];
-doTest[filterOptions[{a->1,b->3},{a->2,b->4}], {a->2,b->4}];
-doTest[filterOptions[{a->1,b->3,a->2},{a->2,b->4}], $Failed,{SaferOptions::duplicateOptions}]; 
-doTest[filterOptions[{a->1,b->3},{a->2,b->4,a->2}], $Failed,{SaferOptions::duplicateOptions}]; 
+doTest[filterOptionList[{}], {}];
+doTest[filterOptionList[{},{}], {}];
+doTest[filterOptionList[{a->1},{}], {}];
+doTest[filterOptionList[{a->1},{a->2}], {a->2}];
+doTest[filterOptionList[{},{a->2}], {}];
+doTest[filterOptionList[{b->3},{a->2}], {}];
+doTest[filterOptionList[{a->1,b->3},{a->2,b->4}], {a->2,b->4}];
+doTest[filterOptionList[{a->1,b->3,a->2},{a->2,b->4}], $Failed,{SaferOptions::duplicateOptions}]; 
+doTest[filterOptionList[{a->1,b->3},{a->2,b->4,a->2}], $Failed,{SaferOptions::duplicateOptions}]; 
 
 
 (* ::Subchapter:: *)
@@ -326,8 +329,8 @@ Options[foo3] = createOptionList[{a -> 10, b -> 1, c -> 4}, Options /@ {foo1, fo
 
 foo3[opts : OptionsPattern[]] :=      
   Block[{safeOpts = getOptionList[Options[foo3],opts]},
-   foo1[1, 2,filterOptions[Options[foo1],safeOpts]]; 
-   foo2[4, 5,filterOptions[Options[foo2],safeOpts]];
+   foo1[1, 2,filterOptionList[Options[foo1],safeOpts]]; 
+   foo2[4, 5,filterOptionList[Options[foo2],safeOpts]];
   ];
 
 
@@ -338,8 +341,8 @@ Options[foo3] = createOptionList[{a -> 10, c -> 4}, Options /@ {foo1, foo2}];
 
 foo3[opts : OptionsPattern[]] :=      
   Block[{safeOpts = getOptionList[Options[foo3],opts]},
-   foo1[1, 2,filterOptions[Options[foo1],safeOpts]]; 
-   foo2[4, 5,filterOptions[Options[foo2],safeOpts]];
+   foo1[1, 2,filterOptionList[Options[foo1],safeOpts]]; 
+   foo2[4, 5,filterOptionList[Options[foo2],safeOpts]];
   ];
 
 

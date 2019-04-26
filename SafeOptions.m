@@ -45,10 +45,6 @@ hasUniqueOptionQ::usage=
 "hasUniqueOptionQ[normalizedOptions_?normalizedOptionListQ,k_] checks if option k->? is in allOptions. Caveat: returns false in cases of multi-occurences.";
 
 
-(* ::Subsection:: *)
-(*TODO: change arguments order! -> better coherence with other routines like filters etc...*)
-
-
 overwriteOptions::usage=
 "overwriteOptions[normalizedOptList_?normalizedOptionListQ, k_->v_] overwrite an already existing option in normalizedOptList.\n"<>
 "overwriteOptions[normalizedOptList_?normalizedOptionListQ, k_:>v_] overwrite an already existing option in normalizedOptList.\n"<>
@@ -73,12 +69,12 @@ createOptionList::usage=
 "collects all the option, generally used to create Options[foo]=createOptionList[...]";
 
 
-filterOptions::usage=
-"filterOptions[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] filters allowedOptions returning only those in opts. Equivalent to FilterRules[{opt},allowedOptions]."<>
+filterOptionList::usage=
+"filterOptionList[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] filters allowedOptions returning only those in opts. Equivalent to FilterRules[{opt},allowedOptions]."<>
 "Example:\n"<>
 "Foo[opts:OptionsPattern]:=\n"<>
 "  Block[{},\n"<>
-"    subroutine[filterOptions[Options[subroutines],opts]];\n"<>
+"    subroutine[filterOptionList[Options[subroutines],opts]];\n"<>
 "    ...\n"<>
 "];";
 
@@ -171,7 +167,7 @@ checkDuplicateFreeOptionsQ[allowedOptions_?normalizedOptionListQ] :=
 ,* however this is on purpose as full benefice of "opts:OptionsPattern[]" impose to
 ,* put this pattern at the end
 ,*)
-filterOptions[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] :=
+filterOptionList[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] :=
         Block[{normalizedOpts},
               If[Not[checkDuplicateFreeOptionsQ[allowedOptions]], Return[$Failed]];
               normalizedOpts = normalizeOptionPattern[opts];
@@ -184,7 +180,7 @@ filterOptions[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] :=
 (*getOptionList*)
 
 
-checkgetOptionListQ[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] :=
+checkGetOptionListQ[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] :=
         Block[{normalizedOpts, normalizedOptKeys, allowedOptKeys},
               normalizedOpts = normalizeOptionPattern[opts];
               
@@ -205,7 +201,7 @@ checkgetOptionListQ[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern
 
 getOptionList[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] :=
         Block[{normalizedOpts},
-              If[Not[checkgetOptionListQ[allowedOptions, opts]],Return[$Failed]];
+              If[Not[checkGetOptionListQ[allowedOptions, opts]],Return[$Failed]];
               normalizedOpts = normalizeOptionPattern[opts];
               Return[updateOptions[allowedOptions,normalizedOpts]]
         ];
@@ -247,16 +243,14 @@ createOptionList[addedOptions_?normalizedOptionListQ, inheritedOptions : {{_ ...
               If[safeOpts===$Failed,Return[$Failed]];
               ignoredOptKeys = optionKeysToIgnore /. safeOpts;
               addedOptKeys = Keys[addedOptions];
-              If[Not[checkAddVsIgnoreQ[addedOptKeys, ignoredOptKeys]],
-              Return[$Failed]];
+              If[Not[checkAddVsIgnoreQ[addedOptKeys, ignoredOptKeys]],Return[$Failed]];
               
               forwardedOptions = Flatten[inheritedOptions];
               forwardedOptions = Select[forwardedOptions, Not[MemberQ[ignoredOptKeys, Keys[#]]] &];
               forwardedOptions = Select[forwardedOptions, Not[MemberQ[addedOptKeys, Keys[#]]] &]; (* added options always overwrite inherited options *)
               forwardedOptions = DeleteDuplicates[forwardedOptions];
               
-              If[Not[checkIncompatibleOptionsQ[forwardedOptions]],
-              Return[$Failed]];
+              If[Not[checkIncompatibleOptionsQ[forwardedOptions]],Return[$Failed]];
               
               Return[Join[addedOptions, forwardedOptions]];
         ] /; Apply[And, Map[normalizedOptionListQ, inheritedOptions]]
