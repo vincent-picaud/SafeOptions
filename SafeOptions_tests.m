@@ -174,20 +174,20 @@ doTest[overwriteOptions[{a -> 1,b->{a->1}},a->A,{3}], {a->1,b->{a->A}}];
 
 
 (* ::Subchapter:: *)
-(*addOptions[]*)
+(*appendOptions[]*)
 
 
 << SafeOptions`
-?addOptions
+?appendOptions
 
 
-doTest[addOptions[c -> 3, 1, 2], addOptions[c -> 3, 1, 2]];
-doTest[addOptions[c -> 3], addOptions[c -> 3]];
-doTest[addOptions[{},c -> 3], {c -> 3}];
-doTest[addOptions[c -> 3, {{}}], addOptions[c -> 3, {{}}]];
-doTest[addOptions[c -> 3, a -> 1], addOptions[c -> 3, a -> 1]];
-doTest[addOptions[{c -> 1}, c -> 3], $Failed,{SaferOptions::duplicateOptions}];
-doTest[addOptions[{a -> 1, b -> 2},c -> 3], {a -> 1, b -> 2, c -> 3}];
+doTest[appendOptions[c -> 3, 1, 2], appendOptions[c -> 3, 1, 2]];
+doTest[appendOptions[c -> 3], appendOptions[c -> 3]];
+doTest[appendOptions[{},c -> 3], {c -> 3}];
+doTest[appendOptions[c -> 3, {{}}], appendOptions[c -> 3, {{}}]];
+doTest[appendOptions[c -> 3, a -> 1], appendOptions[c -> 3, a -> 1]];
+doTest[appendOptions[{c -> 1}, c -> 3], $Failed,{SaferOptions::duplicateOptions}];
+doTest[appendOptions[{a -> 1, b -> 2},c -> 3], {a -> 1, b -> 2, c -> 3}];
 
 
 (* ::Subchapter:: *)
