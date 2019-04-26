@@ -87,22 +87,7 @@ foo3[a->5] (* ok for a, but error prone... here we forgot b *)
 ?"SafeOptions`*"
 
 
-(* ::Text:: *)
-(*The general pattern to use this package is :*)
-
-
-Options[foo3] = createOptionList[{a -> 10, b -> 1, c -> 4}, Options /@ {foo1, foo2}];
-
-foo3[opts : OptionsPattern[]] :=      
-  Block[{safeOpts = getOptionList[Options[foo3],opts]},
-   If[safeOpts===$Failed,Return[$Failed]];
-   foo1[1, 2,filterOptionList[Options[foo1],safeOpts]]; 
-   foo2[4, 5,filterOptionList[Options[foo2],safeOpts]];
-  ];
-
-
-(* ::Text:: *)
-(*(See below for further details)*)
+?safeOptions
 
 
 (* ::Subchapter:: *)

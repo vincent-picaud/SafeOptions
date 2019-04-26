@@ -5,19 +5,31 @@ Unprotect @@ Names["SafeOptions`*"];
 ClearAll @@ Names["SafeOptions`*"];
 
 
+safeOptions::usage=
+"The general pattern to use this package is as follows:\n\n"<>
+"Options[foo3] = createOptionList[{a -> 10, b -> 1, c -> 4}, Options /@ {foo1, foo2}];\n"<>
+"\n"<>
+"foo3[opts : OptionsPattern[]] :=  \n"<>    
+"    Block[{safeOpts = getOptionList[Options[foo3], opts]},\n"<>
+"      If[safeOpts === $Failed, Return[$Failed]];\n"<>
+"      foo1[1, 2, filterOptionList[Options[foo1], safeOpts]];\n"<>
+"      foo2[4, 5, filterOptionList[Options[foo2], safeOpts]];\n"<>
+"     ];";
+
+
 (* ::Chapter:: *)
 (*Error messages*)
 
 
-SaferOptions::unknownOptions = "Unknown options `1`";
-SaferOptions::duplicateOptions = "Duplicate options `1`";
+safeOptions::unknownOptions = "Unknown options `1`";
+safeOptions::duplicateOptions = "Duplicate options `1`";
 
 
-SaferOptions::notNormalized="Options `1` are not in a normalized form.";
+safeOptions::notNormalized="Options `1` are not in a normalized form.";
 
 
-SaferOptions::incompatibleOptions="Some options are incompatibles `1`";
-SaferOptions::cannotAddAndIgnore="Cannot add and ignore in the same times these options: `1`";
+safeOptions::incompatibleOptions="Some options are incompatibles `1`";
+safeOptions::cannotAddAndIgnore="Cannot add and ignore in the same times these options: `1`";
 
 
 (* ::Chapter:: *)
@@ -46,9 +58,9 @@ hasUniqueOptionQ::usage=
 
 
 overwriteOptions::usage=
-"overwriteOptions[normalizedOptList_?normalizedOptionListQ, k_->v_] overwrite an already existing option in normalizedOptList.\n"<>
-"overwriteOptions[normalizedOptList_?normalizedOptionListQ, k_:>v_] overwrite an already existing option in normalizedOptList.\n"<>
-"overwriteOptions[normalizedOptList_?normalizedOptionListQ, optionsToModify_?normalizedOptionListQ] overwrite a list of already existing options in normalizedOptList.";
+"overwriteOptions[normalizedOptList_?normalizedOptionListQ, k_->v_] overwrites an already existing option in normalizedOptList.\n"<>
+"overwriteOptions[normalizedOptList_?normalizedOptionListQ, k_:>v_] overwrites an already existing option in normalizedOptList.\n"<>
+"overwriteOptions[normalizedOptList_?normalizedOptionListQ, optionsToModify_?normalizedOptionListQ] overwrites a list of already existing options in normalizedOptList.";
 
 
 appendOptions::usage=
@@ -66,27 +78,18 @@ updateOptions::usage=
 
 ignoreOption::usage="An option to defined ignored option list (used in createOptionList[...])";
 createOptionList::usage=
-"collects all the option, generally used to create Options[foo]=createOptionList[...]";
+"createOptionList[addedOptions_?normalizedOptionListQ, inheritedOptions : {{_ ...} ..}, opts : OptionsPattern[]]\n"<>
+"createOptionList[addedOptions_?normalizedOptionListQ, inheritedOptions_?normalizedOptionListQ, opts : OptionsPattern[]]\n"<>
+"createOptionList[addedOptions_?normalizedOptionListQ]\n\n"<>
+"collects all the options, generally used to create Options[foo]=createOptionList[...]";
 
 
 filterOptionList::usage=
-"filterOptionList[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] filters allowedOptions returning only those in opts. Equivalent to FilterRules[{opt},allowedOptions]."<>
-"Example:\n"<>
-"Foo[opts:OptionsPattern]:=\n"<>
-"  Block[{},\n"<>
-"    subroutine[filterOptionList[Options[subroutines],opts]];\n"<>
-"    ...\n"<>
-"];";
+"filterOptionList[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] filters allowedOptions returning only those in opts, similar to FilterRules[{opt},allowedOptions].";
 
 
 getOptionList::usage=
-"getOptionList[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] compared to filter returns the whole allowedOptions taking into account potential modifications from opts."<>
-"Example:\n"<>
-"Foo[opts:OptionsPattern]:=\n"<>
-"  Block[{allOptions},\n"<>
-"    allOptions=getOptionList[Options[Foo],opts];\n"<>
-"    ...\n"<>
-"];";
+"getOptionList[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] returns the whole allowedOptions taking into account potential modifications from opts.";
 
 
 optionValue::usage=
@@ -111,7 +114,7 @@ normalizedOptionListQ[{((_->_)|(_:>_))...}]:=True;
 
 checkNormalizedOptionListQ[x___] :=
         If[normalizedOptionListQ[x], Return[True],
-           Message[SaferOptions::notNormalized, x];
+           Message[safeOptions::notNormalized, x];
            Return[False];
         ];
 
@@ -121,9 +124,9 @@ hasOptionQ[normalizedOptions_?normalizedOptionListQ, k_] := hasOptionHelper[norm
 hasUniqueOptionQ[normalizedOptions_?normalizedOptionListQ, k_] := hasOptionHelper[normalizedOptions, k] == 1;
 checkHasUniqueOptionQ[normalizedOptions_?normalizedOptionListQ, k_] :=
   Switch[hasOptionHelper[normalizedOptions, k],
-   0, Message[SaferOptions::unknownOptions, k]; Return[False],
+   0, Message[safeOptions::unknownOptions, k]; Return[False],
    1, Return[True],
-   _, Message[SaferOptions::duplicateOptions, k]; Return[False]
+   _, Message[safeOptions::duplicateOptions, k]; Return[False]
    ];
 
 
@@ -131,15 +134,15 @@ overwriteOptions[normalizedOptList_?normalizedOptionListQ, k_ -> v_, levelSpec_:
           If[hasUniqueOptionQ[normalizedOptList, k],
              Return[Replace[normalizedOptList, (k -> _) -> (k -> v), levelSpec]],
              If[hasOptionQ[normalizedOptList, k],
-              Message[SaferOptions::duplicateOptions, k],
-              Message[SaferOptions::unknownOptions, k]]; 
+              Message[safeOptions::duplicateOptions, k],
+              Message[safeOptions::unknownOptions, k]]; 
           Return[$Failed]];
   overwriteOptions[normalizedOptList_?normalizedOptionListQ, k_ :> v_, levelSpec_: 1] :=
         If[hasUniqueOptionQ[normalizedOptList, k],
            Return[Replace[normalizedOptList, (k :> _) -> (k :> v), levelSpec]],
            If[hasOptionQ[normalizedOptList, k],
-            Message[SaferOptions::duplicateOptions, k],
-            Message[SaferOptions::unknownOptions, k]]; 
+            Message[safeOptions::duplicateOptions, k],
+            Message[safeOptions::unknownOptions, k]]; 
         Return[$Failed]];
 overwriteOptions[normalizedOptList_?normalizedOptionListQ, optionsToModify_?normalizedOptionListQ, levelSpec_: {1}] :=
       Fold[overwriteOptions[#1, #2, levelSpec] &, normalizedOptList, optionsToModify];
@@ -147,11 +150,11 @@ overwriteOptions[normalizedOptList_?normalizedOptionListQ, optionsToModify_?norm
 
 appendOptions[normalizedOptList_?normalizedOptionListQ, k_ -> v_] :=
   If[hasOptionQ[normalizedOptList, k],
-   Message[SaferOptions::duplicateOptions, k]; Return[$Failed],
+   Message[safeOptions::duplicateOptions, k]; Return[$Failed],
    Return[Append[normalizedOptList, k -> v]]];
 appendOptions[normalizedOptList_?normalizedOptionListQ, k_ :> v_] :=
   If[hasOptionQ[normalizedOptList, k],
-   Message[SaferOptions::duplicateOptions, k]; Return[$Failed],
+   Message[safeOptions::duplicateOptions, k]; Return[$Failed],
    Return[Append[normalizedOptList, k :> v]]];
 appendOptions[normalizedOptList_?normalizedOptionListQ, optionsToAdd_?normalizedOptionListQ] :=
   Fold[appendOptions, normalizedOptList, optionsToAdd];
@@ -166,7 +169,7 @@ checkDuplicateFreeOptionsQ[allowedOptions_?normalizedOptionListQ] :=
         Block[{keys},
               keys = Keys[allowedOptions];
               If[Not[DuplicateFreeQ[keys]],
-                 Message[SaferOptions::duplicateOptions, Select[Tally[keys], (Last@# > 1) &][[All, 1]]];
+                 Message[safeOptions::duplicateOptions, Select[Tally[keys], (Last@# > 1) &][[All, 1]]];
                  Return[False];
               ];
               Return[True];
@@ -201,7 +204,7 @@ checkGetOptionListQ[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern
               allowedOptKeys = Keys[allowedOptions];
               
               If[Not[SubsetQ[allowedOptKeys, normalizedOptKeys]], 
-                 Message[SaferOptions::unknownOptions, Complement[normalizedOptKeys, Intersection[allowedOptKeys, normalizedOptKeys]]];
+                 Message[safeOptions::unknownOptions, Complement[normalizedOptKeys, Intersection[allowedOptKeys, normalizedOptKeys]]];
                  Return[False];
               ];
               
@@ -226,7 +229,7 @@ checkAddVsIgnoreQ[addedOptKeys_List, ignoredOptKeys_List] :=
               commonKeys = Intersection[addedOptKeys, ignoredOptKeys];
               If[commonKeys == {},
                  Return[True],
-                 Message[SaferOptions::cannotAddAndIgnore, commonKeys];
+                 Message[safeOptions::cannotAddAndIgnore, commonKeys];
                  Return[False]
               ];
         ];
@@ -239,7 +242,7 @@ checkIncompatibleOptionsQ[forwardedOptions_?normalizedOptionListQ] :=
                  incompatible = Select[Tally[Keys[forwardedOptions]], (#[[2]] > 1) &][[All, 1]];
                  incompatible = Select[forwardedOptions, MemberQ[incompatible, Keys[#]] &];
                  incompatible = Normal[Merge[incompatible, Identity]];
-                 Message[SaferOptions::incompatibleOptions, incompatible];
+                 Message[safeOptions::incompatibleOptions, incompatible];
                  Return[False];
               ];
         ];

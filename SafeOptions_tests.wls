@@ -162,12 +162,12 @@ doTest[hasUniqueOptionQ[{{a -> 1, b -> 2}},a], hasUniqueOptionQ[{{a -> 1, b -> 2
 
 doTest[overwriteOptions[c->3,1,2],overwriteOptions[c->3,1,2]];
 doTest[overwriteOptions[c->3], overwriteOptions[c->3]];
-doTest[overwriteOptions[{},c->3], $Failed,{SaferOptions::unknownOptions}];
+doTest[overwriteOptions[{},c->3], $Failed,{safeOptions::unknownOptions}];
 doTest[overwriteOptions[c->3,{{}}], overwriteOptions[c->3,{{}}]];
 doTest[overwriteOptions[c->3,a -> 1],overwriteOptions[c->3,a -> 1]];
-doTest[overwriteOptions[{a -> 1},c->3], $Failed,{SaferOptions::unknownOptions}];
+doTest[overwriteOptions[{a -> 1},c->3], $Failed,{safeOptions::unknownOptions}];
 doTest[overwriteOptions[{a -> 1,c->2},c->3], {a->1,c->3}];
-doTest[overwriteOptions[{a -> 1,c->2,c->4},c->3], $Failed,{SaferOptions::duplicateOptions}];
+doTest[overwriteOptions[{a -> 1,c->2,c->4},c->3], $Failed,{safeOptions::duplicateOptions}];
 doTest[overwriteOptions[{a -> 1,b->{a->1}},a->A], {a->A,b->{a->1}}];
 doTest[overwriteOptions[{a -> 1,b->{a->1}},a->A,3], {a->A,b->{a->A}}];
 doTest[overwriteOptions[{a -> 1,b->{a->1}},a->A,{3}], {a->1,b->{a->A}}];
@@ -186,7 +186,7 @@ doTest[appendOptions[c -> 3], appendOptions[c -> 3]];
 doTest[appendOptions[{},c -> 3], {c -> 3}];
 doTest[appendOptions[c -> 3, {{}}], appendOptions[c -> 3, {{}}]];
 doTest[appendOptions[c -> 3, a -> 1], appendOptions[c -> 3, a -> 1]];
-doTest[appendOptions[{c -> 1}, c -> 3], $Failed,{SaferOptions::duplicateOptions}];
+doTest[appendOptions[{c -> 1}, c -> 3], $Failed,{safeOptions::duplicateOptions}];
 doTest[appendOptions[{a -> 1, b -> 2},c -> 3], {a -> 1, b -> 2, c -> 3}];
 
 
@@ -203,7 +203,7 @@ doTest[updateOptions[c -> 3], updateOptions[c -> 3]];
 doTest[updateOptions[c -> 3, {{}}], updateOptions[c -> 3, {{}}]];
 doTest[updateOptions[c -> 3, a -> 1], updateOptions[c -> 3, a -> 1]];
 doTest[updateOptions[{a -> 1, c -> 2},c -> 3], {a -> 1, c -> 3}];
-doTest[updateOptions[{a -> 1, c -> 2, c -> 4},c -> 3], $Failed,{SaferOptions::duplicateOptions}];
+doTest[updateOptions[{a -> 1, c -> 2, c -> 4},c -> 3], $Failed,{safeOptions::duplicateOptions}];
 doTest[updateOptions[{a -> 1, b -> {a -> 1}},a -> A], {a -> A, b -> {a -> 1}}];
 
 doTest[updateOptions[c -> 3, 1, 2], updateOptions[c -> 3, 1, 2]];
@@ -222,7 +222,7 @@ doTest[updateOptions[ {a -> 1, b -> 2},c -> 3], {a -> 1, b -> 2, c -> 3}];
 doTest[SafeOptions`Private`checkDuplicateFreeOptionsQ[{}], True];
 doTest[SafeOptions`Private`checkDuplicateFreeOptionsQ[{a->1}], True];
 doTest[SafeOptions`Private`checkDuplicateFreeOptionsQ[{a->1,b->2}], True];
-doTest[SafeOptions`Private`checkDuplicateFreeOptionsQ[{a->1,a->2}], False,{SaferOptions::duplicateOptions}]; (* must print error msg *)
+doTest[SafeOptions`Private`checkDuplicateFreeOptionsQ[{a->1,a->2}], False,{safeOptions::duplicateOptions}]; (* must print error msg *)
 
 
 (* ::Subchapter:: *)
@@ -233,13 +233,13 @@ doTest[SafeOptions`Private`checkDuplicateFreeOptionsQ[{a->1,a->2}], False,{Safer
 
 
 doTest[SafeOptions`Private`checkGetOptionListQ[{}], True];
-doTest[SafeOptions`Private`checkGetOptionListQ[{}, {{a -> 1}}], False,{SaferOptions::unknownOptions}]; 
+doTest[SafeOptions`Private`checkGetOptionListQ[{}, {{a -> 1}}], False,{safeOptions::unknownOptions}]; 
 doTest[SafeOptions`Private`checkGetOptionListQ[{a -> 2}, {{a -> 1}}], True];
 doTest[SafeOptions`Private`checkGetOptionListQ[{a -> 2, b -> 3}, {{a -> 1}}], True];
 doTest[SafeOptions`Private`checkGetOptionListQ[{a -> 2, b -> 3}, a -> 1], True];
-doTest[SafeOptions`Private`checkGetOptionListQ[{a -> 2}, {{a -> 1, b -> 3}}], False,{SaferOptions::unknownOptions}];
-doTest[SafeOptions`Private`checkGetOptionListQ[{a -> 2, b -> 3, a -> 4}, {{a -> 1}}], False,{SaferOptions::duplicateOptions}];
-doTest[SafeOptions`Private`checkGetOptionListQ[{a -> 2, b -> 3}, {{a -> 1, a -> 2}}], False,{SaferOptions::duplicateOptions}]; 
+doTest[SafeOptions`Private`checkGetOptionListQ[{a -> 2}, {{a -> 1, b -> 3}}], False,{safeOptions::unknownOptions}];
+doTest[SafeOptions`Private`checkGetOptionListQ[{a -> 2, b -> 3, a -> 4}, {{a -> 1}}], False,{safeOptions::duplicateOptions}];
+doTest[SafeOptions`Private`checkGetOptionListQ[{a -> 2, b -> 3}, {{a -> 1, a -> 2}}], False,{safeOptions::duplicateOptions}]; 
 
 
 (* ::Subchapter:: *)
@@ -257,8 +257,8 @@ doTest[filterOptionList[{a->1},{a->2}], {a->2}];
 doTest[filterOptionList[{},{a->2}], {}];
 doTest[filterOptionList[{b->3},{a->2}], {}];
 doTest[filterOptionList[{a->1,b->3},{a->2,b->4}], {a->2,b->4}];
-doTest[filterOptionList[{a->1,b->3,a->2},{a->2,b->4}], $Failed,{SaferOptions::duplicateOptions}]; 
-doTest[filterOptionList[{a->1,b->3},{a->2,b->4,a->2}], $Failed,{SaferOptions::duplicateOptions}]; 
+doTest[filterOptionList[{a->1,b->3,a->2},{a->2,b->4}], $Failed,{safeOptions::duplicateOptions}]; 
+doTest[filterOptionList[{a->1,b->3},{a->2,b->4,a->2}], $Failed,{safeOptions::duplicateOptions}]; 
 
 
 (* ::Subchapter:: *)
@@ -273,11 +273,11 @@ doTest[getOptionList[{}], {}];
 doTest[getOptionList[{},{}], {}];
 doTest[getOptionList[{a->1},{}], {a->1}];
 doTest[getOptionList[{a->1},{a->2}], {a->2}];
-doTest[getOptionList[{},{a->2}], $Failed,{SaferOptions::unknownOptions}];
-doTest[getOptionList[{b->3},{a->2}], $Failed,{SaferOptions::unknownOptions}];
+doTest[getOptionList[{},{a->2}], $Failed,{safeOptions::unknownOptions}];
+doTest[getOptionList[{b->3},{a->2}], $Failed,{safeOptions::unknownOptions}];
 doTest[getOptionList[{a->1,b->3},{a->2,b->4}], {a->2,b->4}];
-doTest[getOptionList[{a->1,b->3,a->2},{a->2,b->4}], $Failed,{SaferOptions::duplicateOptions}]; 
-doTest[getOptionList[{a->1,b->3},{a->2,b->4,a->2}], $Failed,{SaferOptions::duplicateOptions}]; 
+doTest[getOptionList[{a->1,b->3,a->2},{a->2,b->4}], $Failed,{safeOptions::duplicateOptions}]; 
+doTest[getOptionList[{a->1,b->3},{a->2,b->4,a->2}], $Failed,{safeOptions::duplicateOptions}]; 
 
 
 (* ::Subchapter:: *)
@@ -289,14 +289,14 @@ doTest[getOptionList[{a->1,b->3},{a->2,b->4,a->2}], $Failed,{SaferOptions::dupli
 
 
 doTest[createOptionList[{},{}],{}];
-doTest[createOptionList[{a->1},{{}},optionsToIgnore->{}],$Failed,{SaferOptions::unknownOptions}]; 
-doTest[createOptionList[{a->1},{{}},optionKeysToIgnore->{a}],$Failed,{SaferOptions::cannotAddAndIgnore}]; 
+doTest[createOptionList[{a->1},{{}},optionsToIgnore->{}],$Failed,{safeOptions::unknownOptions}]; 
+doTest[createOptionList[{a->1},{{}},optionKeysToIgnore->{a}],$Failed,{safeOptions::cannotAddAndIgnore}]; 
 doTest[createOptionList[{a->1},{{}},optionKeysToIgnore->{b}], {a->1}]; 
 doTest[createOptionList[{a->1},{{}},optionKeysToIgnore->{}], {a->1}]; 
 doTest[createOptionList[{a->1},{{b->2},{c->3}},optionKeysToIgnore->{}],{a->1,b->2,c->3} ]; 
 doTest[createOptionList[{a->1},{{b->2},{c->3}},optionKeysToIgnore->{b}],{a->1,c->3} ]; 
 doTest[createOptionList[{a->1},{{b->2},{b->3}},optionKeysToIgnore->{b}],{a->1}]; 
-doTest[createOptionList[{a->1},{{b->2},{b->3}},optionKeysToIgnore->{}],$Failed,{SaferOptions::incompatibleOptions}]; 
+doTest[createOptionList[{a->1},{{b->2},{b->3}},optionKeysToIgnore->{}],$Failed,{safeOptions::incompatibleOptions}]; 
 
 
 (* ::Subchapter:: *)
@@ -307,9 +307,9 @@ doTest[createOptionList[{a->1},{{b->2},{b->3}},optionKeysToIgnore->{}],$Failed,{
 ?optionValue
 
 
-doTest[optionValue[{},a],$Failed,{SaferOptions::unknownOptions}]; 
+doTest[optionValue[{},a],$Failed,{safeOptions::unknownOptions}]; 
 doTest[optionValue[{a->1},a],1];
-doTest[optionValue[{a->1,b->2,a->3},a],$Failed,{SaferOptions::duplicateOptions}];
+doTest[optionValue[{a->1,b->2,a->3},a],$Failed,{safeOptions::duplicateOptions}];
 doTest[optionValue[{a->1,b->2,c->3},b],2];
 
 
