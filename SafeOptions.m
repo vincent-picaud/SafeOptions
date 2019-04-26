@@ -50,31 +50,21 @@ hasUniqueOptionQ::usage=
 
 
 overwriteOptions::usage=
-"overwriteOptions[k_->v_,normalizedOptList_?normalizedOptionListQ] overwrite an already existing option in normalizedOptList.\n"<>
-"overwriteOptions[k_:>v_,normalizedOptList_?normalizedOptionListQ] overwrite an already existing option in normalizedOptList.\n"<>
-"overwriteOptions[modifiedOptions_?normalizedOptionListQ,normalizedOptList_?normalizedOptionListQ] overwrite a list of already existing options in normalizedOptList.\n\n"<>
-"Example: (by default only the first level is affected)\n"<>
-"overwriteOptions[a\[Rule]A,{a -> 1,b\[Rule]{a\[Rule]1}}]\n"<>
-"{a\[Rule]A,b\[Rule]{a\[Rule]1}}\n\n"<>
-"overwriteOptions[a\[Rule]A,{a -> 1,b\[Rule]{a\[Rule]1}},{3}]\n"<>
-"{a\[Rule]1,b\[Rule]{a\[Rule]A}}";
+"overwriteOptions[normalizedOptList_?normalizedOptionListQ, k_->v_] overwrite an already existing option in normalizedOptList.\n"<>
+"overwriteOptions[normalizedOptList_?normalizedOptionListQ, k_:>v_] overwrite an already existing option in normalizedOptList.\n"<>
+"overwriteOptions[normalizedOptList_?normalizedOptionListQ, modifiedOptions_?normalizedOptionListQ] overwrite a list of already existing options in normalizedOptList.";
 
 
 addOptions::usage=
-"addOptions[k_->v_,normalizedOptList_?normalizedOptionListQ] adds an option at the end of normalizedOptList.\n"<>
-"addOptions[k_:>v_,normalizedOptList_?normalizedOptionListQ] adds an option at the end of normalizedOptList.\n"<>
-"addOptions[modifiedOptions_?normalizedOptionListQ,normalizedOptList_?normalizedOptionListQ] adds options at the end of normalizedOptList.\n\n"<>
-"Example:\n"<>
-"addOptions[a\[Rule]1,{b -> 2}]\n"<>
-"{b\[Rule]2,a\[Rule]1}\n\n"<>
-"caveat: if the option already exists an Assert[False] occurs\n"<>
-"addOptions[a\[Rule]1,{a -> 2}]"
+"addOptions[normalizedOptList_?normalizedOptionListQ, k_->v_] adds an option at the end of normalizedOptList.\n"<>
+"addOptions[normalizedOptList_?normalizedOptionListQ, k_:>v_] adds an option at the end of normalizedOptList.\n"<>
+"addOptions[normalizedOptList_?normalizedOptionListQ, modifiedOptions_?normalizedOptionListQ] adds options at the end of normalizedOptList.";
 
 
 updateOptions::usage=
-"updateOptions[k_->v_,normalizedOptList_?normalizedOptionListQ]\n"<>
-"updateOptions[k_:>v_,normalizedOptList_?normalizedOptionListQ]\n"<>
-"updateOptions[modifiedOptions_?normalizedOptionListQ,normalizedOptList_?normalizedOptionListQ]\n\n"<>
+"updateOptions[normalizedOptList_?normalizedOptionListQ, k_->v_]\n"<>
+"updateOptions[normalizedOptList_?normalizedOptionListQ, k_:>v_]\n"<>
+"updateOptions[normalizedOptList_?normalizedOptionListQ, modifiedOptions_?normalizedOptionListQ]\n\n"<>
 "checks if the option k is already defined and switch to the right addOptions[...] or updateOptions[...] functions according to the test result.";
 
 
@@ -131,19 +121,39 @@ hasOptionQ[normalizedOptions_?normalizedOptionListQ,k_]:=hasOptionHelper[normali
 hasUniqueOptionQ[normalizedOptions_?normalizedOptionListQ,k_]:=hasOptionHelper[normalizedOptions,k]==1;
 
 
-overwriteOptions[k_->v_,normalizedOptList_?normalizedOptionListQ,levelSpec_:1]:=Block[{},Assert[hasUniqueOptionQ[k,normalizedOptList]];Return[Replace[normalizedOptList,(k->_)->(k->v),levelSpec]]];
-overwriteOptions[k_:>v_,normalizedOptList_?normalizedOptionListQ,levelSpec_:1]:=Block[{},Assert[hasUniqueOptionQ[k,normalizedOptList]];Return[Replace[normalizedOptList,(k:>_)->(k:>v),levelSpec]]];
-overwriteOptions[modifiedOptions_?normalizedOptionListQ,normalizedOptList_?normalizedOptionListQ,levelSpec_:{1}]:=Fold[overwriteOptions[#2,#1,levelSpec]&,normalizedOptList,modifiedOptions];
+overwriteOptions[normalizedOptList_?normalizedOptionListQ, k_ -> v_, levelSpec_: 1] :=
+          If[hasUniqueOptionQ[normalizedOptList, k],
+             Return[Replace[normalizedOptList, (k -> _) -> (k -> v), levelSpec]],
+             If[hasOptionQ[normalizedOptList, k],
+              Message[SaferOptions::duplicateOptions, k],
+              Message[SaferOptions::unknownOptions, k]]; 
+          Return[$Failed]];
+  overwriteOptions[normalizedOptList_?normalizedOptionListQ, k_ :> v_, levelSpec_: 1] :=
+        If[hasUniqueOptionQ[normalizedOptList, k],
+           Return[Replace[normalizedOptList, (k :> _) -> (k :> v), levelSpec]],
+           If[hasOptionQ[normalizedOptList, k],
+            Message[SaferOptions::duplicateOptions, k],
+            Message[SaferOptions::unknownOptions, k]]; 
+        Return[$Failed]];
+overwriteOptions[normalizedOptList_?normalizedOptionListQ, modifiedOptions_?normalizedOptionListQ, levelSpec_: {1}] :=
+      Fold[overwriteOptions[#1, #2, levelSpec] &, normalizedOptList, modifiedOptions];
 
 
-addOptions[k_->v_,normalizedOptList_?normalizedOptionListQ]:=Block[{},Assert[Not[hasOptionQ[normalizedOptList,k]]];Return[Append[normalizedOptList,k->v]]];
-addOptions[k_:>v_,normalizedOptList_?normalizedOptionListQ]:=Block[{},Assert[Not[hasOptionQ[normalizedOptList,k]]];Return[Append[normalizedOptList,k:>v]]];
-addOptions[addedOptions_?normalizedOptionListQ,normalizedOptList_?normalizedOptionListQ]:=Fold[addOptions[#2,#1]&,normalizedOptList,addedOptions];
+addOptions[normalizedOptList_?normalizedOptionListQ, k_ -> v_] :=
+  If[hasOptionQ[normalizedOptList, k],
+   Message[SaferOptions::duplicateOptions, k]; Return[$Failed],
+   Return[Append[normalizedOptList, k -> v]]];
+addOptions[normalizedOptList_?normalizedOptionListQ, k_ :> v_] :=
+  If[hasOptionQ[normalizedOptList, k],
+   Message[SaferOptions::duplicateOptions, k]; Return[$Failed],
+   Return[Append[normalizedOptList, k :> v]]];
+addOptions[normalizedOptList_?normalizedOptionListQ, optionsToAdd_?normalizedOptionListQ] :=
+  Fold[addOptions, normalizedOptList, optionsToAdd];
 
 
-updateOptions[k_->v_,normalizedOptList_?normalizedOptionListQ]:=If[hasOptionQ[normalizedOptList,k],overwriteOptions[k->v,normalizedOptList],addOptions[k->v,normalizedOptList]];
-updateOptions[k_:>v_,normalizedOptList_?normalizedOptionListQ]:=If[hasOptionQ[normalizedOptList,k],overwriteOptions[k:>v,normalizedOptList],addOptions[k:>v,normalizedOptList]];
-updateOptions[modifiedOptions_?normalizedOptionListQ,normalizedOptList_?normalizedOptionListQ]:=Fold[updateOptions[#2,#1]&,normalizedOptList,modifiedOptions];
+updateOptions[normalizedOptList_?normalizedOptionListQ, k_->v_]:=If[hasOptionQ[normalizedOptList,k],overwriteOptions[normalizedOptList,k->v],addOptions[normalizedOptList,k->v]];
+updateOptions[normalizedOptList_?normalizedOptionListQ, k_:>v_]:=If[hasOptionQ[normalizedOptList,k],overwriteOptions[normalizedOptList,k:>v],addOptions[normalizedOptList,k:>v]];
+updateOptions[normalizedOptList_?normalizedOptionListQ, modifiedOptions_?normalizedOptionListQ]:=Fold[updateOptions,normalizedOptList,modifiedOptions];
 
 
 checkDuplicateFreeOptionsQ[allowedOptions_?normalizedOptionListQ] :=
@@ -197,7 +207,7 @@ getOptionList[allowedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] :=
         Block[{normalizedOpts},
               If[Not[checkgetOptionListQ[allowedOptions, opts]],Return[$Failed]];
               normalizedOpts = normalizeOptionPattern[opts];
-              Return[updateOptions[normalizedOpts, allowedOptions]]
+              Return[updateOptions[allowedOptions,normalizedOpts]]
         ];
 
 
