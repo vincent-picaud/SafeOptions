@@ -303,6 +303,20 @@ doTest[createOptionList[{a->1},{{b->2},{b->3}},optionKeysToIgnore->{b}],{a->1}];
 doTest[createOptionList[{a->1},{{b->2},{b->3}},optionKeysToIgnore->{}],$Failed,{SaferOptions::incompatibleOptions}]; 
 
 
+(* ::Subchapter:: *)
+(*optionValue[]*)
+
+
+<<SafeOptions`
+?optionValue
+
+
+doTest[optionValue[{},a],$Failed,{SaferOptions::unknownOptions}]; 
+doTest[optionValue[{a->1},a],1];
+doTest[optionValue[{a->1,b->2,a->3},a],$Failed,{SaferOptions::duplicateOptions}];
+doTest[optionValue[{a->1,b->2,c->3},b],2];
+
+
 (* ::Chapter:: *)
 (*Report (must be 100%)*)
 

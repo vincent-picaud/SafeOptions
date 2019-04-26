@@ -89,6 +89,10 @@ getOptionList::usage=
 "];";
 
 
+optionValue::usage=
+"optionValue[allowedOptions_?normalizedOptionListQ, k_Symbol] returns k-option value. $Failed in case of undefined key k.";
+
+
 (* ::Chapter:: *)
 (*Code*)
 
@@ -112,9 +116,15 @@ checkNormalizedOptionListQ[x___] :=
         ];
 
 
-hasOptionHelper[normalizedOptions_?normalizedOptionListQ,k_]:=Count[normalizedOptions,k->_]
-hasOptionQ[normalizedOptions_?normalizedOptionListQ,k_]:=hasOptionHelper[normalizedOptions,k]>=1;
-hasUniqueOptionQ[normalizedOptions_?normalizedOptionListQ,k_]:=hasOptionHelper[normalizedOptions,k]==1;
+hasOptionHelper[normalizedOptions_?normalizedOptionListQ, k_] := Count[normalizedOptions, k -> _]
+hasOptionQ[normalizedOptions_?normalizedOptionListQ, k_] := hasOptionHelper[normalizedOptions, k] >= 1;
+hasUniqueOptionQ[normalizedOptions_?normalizedOptionListQ, k_] := hasOptionHelper[normalizedOptions, k] == 1;
+checkHasUniqueOptionQ[normalizedOptions_?normalizedOptionListQ, k_] :=
+  Switch[hasOptionHelper[normalizedOptions, k],
+   0, Message[SaferOptions::unknownOptions, k]; Return[False],
+   1, Return[True],
+   _, Message[SaferOptions::duplicateOptions, k]; Return[False]
+   ];
 
 
 overwriteOptions[normalizedOptList_?normalizedOptionListQ, k_ -> v_, levelSpec_: 1] :=
@@ -257,6 +267,10 @@ createOptionList[addedOptions_?normalizedOptionListQ, inheritedOptions : {{_ ...
 
 createOptionList[addedOptions_?normalizedOptionListQ, inheritedOptions_?normalizedOptionListQ, opts : OptionsPattern[]] :=
         createOptionList[addedOptions, {inheritedOptions}, opts];
+
+
+optionValue[allowedOptions_?normalizedOptionListQ, k_Symbol]:=
+If[checkHasUniqueOptionQ[allowedOptions,k],Return[k/.allowedOptions],Return[$Failed]];
 
 
 End[]; (* private *)
