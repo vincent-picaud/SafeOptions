@@ -89,7 +89,7 @@ Options[foo3] = createOptionList[{a -> 10, b -> 1}, Options /@ {foo1, foo2}];
 
 foo3[opts : OptionsPattern[]] :=      
 	Block[{safeOpts},
-	      If[(safeOpts getOptionList[Options[foo3], opts]) === $Failed, Return[$Failed]];
+	      If[(safeOpts = getOptionList[Options[foo3], opts]) === $Failed, Return[$Failed]];
 	      foo1[1, 2, filterOptionList[Options[foo1], safeOpts]]; 
 	      foo2[4, 5, filterOptionList[Options[foo2], safeOpts]];
 	];
@@ -103,7 +103,96 @@ foo3[]
 
 prints:
 #+BEGIN_EXAMPLE
-foo1 a=1 b=2
+foo1 a=10 b=1
 
-foo2 b=-2
+foo2 b=1
 #+END_EXAMPLE
+as expected. The options are *correctly forwarded*.
+
+Also observe that if we do not provide a default value =b->1= option:
+
+#+BEGIN_SRC mathematica
+Options[foo3] = createOptionList[{a -> 10}, Options /@ {foo1, foo2}]
+#+END_SRC
+
+*an error message is generated as =b= option has two incompatible values*:
+#+BEGIN_EXAMPLE
+In[26]:= safeOptions::incompatibleOptions: Some options are incompatibles {b->{2,-2}}
+
+Out[26]= $Failed
+#+END_EXAMPLE
+
+* Documentation
+
+=SafeOptions= package defines these symbols and functions:
+#+BEGIN_SRC mathematica
+?"SafeOptions`*"
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+appendOptions	   hasUniqueOptionQ	    optionValue
+createOptionList   ignoreOption	            overwriteOptions
+filterOptionList   normalizedOptionListQ    safeOptions
+getOptionList	   normalizeOptionPattern   updateOptions
+hasOptionQ	   optionKeysToIgnore	
+#+END_EXAMPLE
+
+** Main functions
+The usual scheme to use =SafeOptions= is as follows:
+
+#+BEGIN_SRC mathematica
+Options[foo3] = createOptionList[{a -> 10, b -> 1}, Options /@ {foo1, foo2}];
+
+foo3[opts : OptionsPattern[]] :=      
+	Block[{safeOpts},
+	      If[(safeOpts = getOptionList[Options[foo3], opts]) === $Failed, Return[$Failed]];
+
+	      safeOpts = updateOptions[safeOpts, b -> 2];
+
+	      foo1[1, 2, filterOptionList[Options[foo1], safeOpts]]; 
+	      foo2[4, 5, filterOptionList[Options[foo2], safeOpts]];
+	];
+#+END_SRC
+
+*** The =createOptionList[]= function
+
+This function creates an exhaustive list of options:
+
+#+BEGIN_SRC mathematica
+createOptionList[addeOptions,inheritedOptions,optionKeysToIgnore->{}]
+#+END_SRC
+
+- =addeOptions= are the options you want to add or overload with a default value
+- =inheritedOptions= are the option of the used subroutines
+- =optionKeysToIgnore= is the list of option keys you want to remove
+  from the user interface
+
+**** Examples
+
+***** Basic usage
+
+  #+BEGIN_SRC mathematica
+createOptionList[{a -> 1}, {{b -> 2}, {c -> 3, d -> 4}}]
+  #+END_SRC
+  #+BEGIN_EXAMPLE
+{a -> 1, b -> 2, c -> 3, d -> 4}
+  #+END_EXAMPLE
+
+**** Ignored options
+
+  #+BEGIN_SRC mathematica
+createOptionList[{a -> 1}, {{b -> 2}, {c -> 3, d -> 4}}, 
+ optionKeysToIgnore -> {b} ]
+  #+END_SRC
+  #+BEGIN_EXAMPLE
+{a -> 1, c -> 3, d -> 4}
+  #+END_EXAMPLE
+
+** Other stuff of lesser importance
+
+*** =safeOptions= 
+
+Is a symbol reserved for error messages.
+
+
+
