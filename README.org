@@ -55,10 +55,10 @@ foo2 b=-2
 
 *There are two main issues I do not want to accept:*
 
-- the a->10 default value is not forwarded
-- incompatible option b->2 for foo1 and b->-2 for foo2 is not detected
+- the =a->10= default value is not forwarded
+- incompatible option =b->2= for foo1 and =b->-2= for foo2 is not detected
 
-You can force this manually
+You can force this *manually*
 
 #+BEGIN_SRC mathematica
 foo3[a -> 10, b -> 2]
@@ -70,10 +70,40 @@ foo1 a=10 b=2
 foo2 b=2
 #+END_EXAMPLE
 
-However this is not a "real" solution as you have to "manually" manage
-all the option details. 
+However this is not a good solution as you have to "manually" manage
+all the option details.
 
 This is the point where this package comes to the rescue.
 
 ** SafeOptions's solution
 
+To use the package
+#+BEGIN_SRC mathematica
+<<SafeOptions`
+#+END_SRC
+
+you must modify =foo3= as follows:
+
+#+BEGIN_SRC mathematica
+Options[foo3] = createOptionList[{a -> 10, b -> 1}, Options /@ {foo1, foo2}];
+
+foo3[opts : OptionsPattern[]] :=      
+	Block[{safeOpts},
+	      If[(safeOpts getOptionList[Options[foo3], opts]) === $Failed, Return[$Failed]];
+	      foo1[1, 2, filterOptionList[Options[foo1], safeOpts]]; 
+	      foo2[4, 5, filterOptionList[Options[foo2], safeOpts]];
+	];
+#+END_SRC
+
+now
+
+#+BEGIN_SRC mathematica
+foo3[]
+#+END_SRC
+
+prints:
+#+BEGIN_EXAMPLE
+foo1 a=1 b=2
+
+foo2 b=-2
+#+END_EXAMPLE
