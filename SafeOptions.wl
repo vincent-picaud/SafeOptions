@@ -274,6 +274,9 @@ createOptionList[addedOptions_?normalizedOptionListQ, inheritedOptions_?normaliz
 createOptionList[addedOptions_?normalizedOptionListQ]:=
 	createOptionList[addedOptions, {}];
 
+createOptionList[inheritedOptions: {{_ ...} ..}]:=
+	createOptionList[{},inheritedOptions] /; Apply[And, Map[normalizedOptionListQ, inheritedOptions]];
+
 
 optionValue[allowedOptions_?normalizedOptionListQ, k_Symbol]:=
 If[checkHasUniqueOptionQ[allowedOptions,k],Return[k/.allowedOptions],Return[$Failed]];
