@@ -1,0 +1,79 @@
+#+TITLE: SafeOptions, a package for safer option management
+
+* What is it?
+
+SafeOptions is a small Mathematica package I have written to provide a
+safer way to use options.
+
+** Motivation
+
+Algorithms can often be splitted into smaller and reusable functions
+(that's a good thing).
+
+However with this scheme you have to control option value coherence
+and perform option forwarding.
+
+Imagine that you have 2 functions: foo1 and foo2, where a,b are your
+algorithm parameters:
+
+#+BEGIN_SRC wolfram
+Options[foo1] = {a -> 1, b -> 2};
+
+foo1[arg__, opts : OptionsPattern[]] := 
+	Print["foo1 a=", OptionValue[a], " b=", OptionValue[b]]; 
+
+Options[foo2] = {b -> -2};
+
+foo2[arg__, opts : OptionsPattern[]] := 
+	Print["foo2 b=", OptionValue[b]];
+#+END_SRC
+
+Now you want to define a foo3 function that reuses foo1 and foo2:
+
+#+BEGIN_SRC wolfram
+Options[foo3] = {a -> 10, c -> 4};
+
+foo3[opts : OptionsPattern[]] :=
+	Block[{},
+	      foo1[1, 2, FilterRules[{opts}, Options[foo1]]];
+	      foo2[4, 5, FilterRules[{opts}, Options[foo2]]];
+	];
+#+END_SRC
+
+Now observe that
+
+#+BEGIN_SRC wolfram
+foo3[]
+#+END_SRC
+
+prints:
+#+BEGIN_EXAMPLE
+foo1 a=1 b=2
+
+foo2 b=-2
+#+END_EXAMPLE
+
+*There are two main issues I do not want to accept:*
+
+- the a->10 default value is not forwarded
+- incompatible option b->2 for foo1 and b->-2 for foo2 is not detected
+
+You can force this manually
+
+#+BEGIN_SRC wolfram
+foo3[a -> 10, b -> 2]
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+foo1 a=10 b=2
+
+foo2 b=2
+#+END_EXAMPLE
+
+However this is not a "real" solution as you have to "manually" manage
+all the option details. 
+
+This is the point where this package comes to the rescue.
+
+** SafeOptions's solution
+
