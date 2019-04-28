@@ -2,21 +2,21 @@
 
 * What is it?
 
-SafeOptions is a small Mathematica package I have written to provide a
-safer way to use options.
+  SafeOptions is a small Mathematica package I have written to provide a
+  safer way to use options.
 
 ** Motivation
 
-Algorithms can often be splitted into smaller and reusable functions
-(that's a good thing).
+   Algorithms can often be splitted into smaller and reusable functions
+   (that's a good thing).
 
-However with this scheme you have to control option value coherence
-and perform option forwarding.
+   However with this scheme you have to control option value coherence
+   and perform option forwarding.
 
-Imagine that you have 2 functions: foo1 and foo2, where a,b are your
-algorithm parameters:
+   Imagine that you have 2 functions: foo1 and foo2, where a,b are your
+   algorithm parameters:
 
-#+BEGIN_SRC mathematica
+   #+BEGIN_SRC mathematica
 Options[foo1] = {a->1, b->2};
 
 foo1[arg__, opts : OptionsPattern[]] := 
@@ -26,11 +26,11 @@ Options[foo2] = {b->-2};
 
 foo2[arg__, opts : OptionsPattern[]] := 
 	Print["foo2 b=", OptionValue[b]];
-#+END_SRC
+   #+END_SRC
 
-Now you want to define a foo3 function that reuses foo1 and foo2:
+   Now you want to define a foo3 function that reuses foo1 and foo2:
 
-#+BEGIN_SRC mathematica
+   #+BEGIN_SRC mathematica
 Options[foo3] = {a->10, c->4};
 
 foo3[opts : OptionsPattern[]] :=
@@ -38,53 +38,53 @@ foo3[opts : OptionsPattern[]] :=
 	      foo1[1, 2, FilterRules[{opts}, Options[foo1]]];
 	      foo2[4, 5, FilterRules[{opts}, Options[foo2]]];
 	];
-#+END_SRC
+   #+END_SRC
 
-Now observe that
+   Now observe that
 
-#+BEGIN_SRC mathematica
+   #+BEGIN_SRC mathematica
 foo3[]
-#+END_SRC
+   #+END_SRC
 
-prints:
-#+BEGIN_EXAMPLE
+   prints:
+   #+BEGIN_EXAMPLE
 foo1 a=1 b=2
 
 foo2 b=-2
-#+END_EXAMPLE
+   #+END_EXAMPLE
 
-*There are two main issues I do not want to accept:*
+   *There are two main issues:*
 
-- the =a->10= default value is not forwarded
-- incompatible option =b->2= for foo1 and =b->-2= for foo2 is not detected
+   - the =a->10= default value is not forwarded
+   - incompatible option =b->2= for foo1 and =b->-2= for foo2 is not detected
 
-You can force this *manually*
+   You can force this *manually*
 
-#+BEGIN_SRC mathematica
+   #+BEGIN_SRC mathematica
 foo3[a->10, b->2]
-#+END_SRC
+   #+END_SRC
 
-#+BEGIN_EXAMPLE
+   #+BEGIN_EXAMPLE
 foo1 a=10 b=2
 
 foo2 b=2
-#+END_EXAMPLE
+   #+END_EXAMPLE
 
-However this is not a good solution as you have to "manually" manage
-all the option details.
+   However this is not a good solution as you have to "manually" manage
+   all the option details.
 
-This is the point where this package comes to the rescue.
+   This is the point where this package comes to the rescue.
 
 ** SafeOptions's solution
 
-To use the package
-#+BEGIN_SRC mathematica
+   To use the package
+   #+BEGIN_SRC mathematica
 <<SafeOptions`
-#+END_SRC
+   #+END_SRC
 
-you must modify =foo3= as follows:
+   you must modify =foo3= as follows:
 
-#+BEGIN_SRC mathematica
+   #+BEGIN_SRC mathematica
 Options[foo3] = createOptionList[{a->10, b->1}, Options /@ {foo1, foo2}];
 
 foo3[opts : OptionsPattern[]] :=      
@@ -93,53 +93,52 @@ foo3[opts : OptionsPattern[]] :=
 	      foo1[1, 2, filterOptionList[Options[foo1], safeOpts]]; 
 	      foo2[4, 5, filterOptionList[Options[foo2], safeOpts]];
 	];
-#+END_SRC
+   #+END_SRC
 
-now
+   now
 
-#+BEGIN_SRC mathematica
+   #+BEGIN_SRC mathematica
 foo3[]
-#+END_SRC
+   #+END_SRC
 
-prints:
-#+BEGIN_EXAMPLE
+   prints:
+   #+BEGIN_EXAMPLE
 foo1 a=10 b=1
 
 foo2 b=1
-#+END_EXAMPLE
-as expected. The options are *correctly forwarded*.
+   #+END_EXAMPLE
+   as expected. The options are *correctly forwarded*.
 
-Also observe that if we do not provide a default value =b->1= option:
+   Also observe that if we do not provide a default value =b->1= option:
 
-#+BEGIN_SRC mathematica
+   #+BEGIN_SRC mathematica
 Options[foo3] = createOptionList[{a->10}, Options /@ {foo1, foo2}]
-#+END_SRC
+   #+END_SRC
 
-*an error message is generated as =b= option has two incompatible values*:
-#+BEGIN_EXAMPLE
-In[26]:= safeOptions::incompatibleOptions: Some options are incompatibles {b->{2,-2}}
-
-Out[26]= $Failed
-#+END_EXAMPLE
+   *an error message is generated as =b= option has two incompatible values*:
+   #+BEGIN_EXAMPLE
+safeOptions::incompatibleOptions: Some options are incompatibles {b->{2,-2}}
+$Failed
+   #+END_EXAMPLE
 
 * Documentation
 
-=SafeOptions= package defines these symbols and functions:
-#+BEGIN_SRC mathematica
+  =SafeOptions= package defines these symbols and functions:
+  #+BEGIN_SRC mathematica
 ?"SafeOptions`*"
-#+END_SRC
+  #+END_SRC
 
-#+BEGIN_EXAMPLE
+  #+BEGIN_EXAMPLE
 appendOptions	   hasUniqueOptionQ	    optionValue
 createOptionList   ignoreOption	            overwriteOptions
 filterOptionList   normalizedOptionListQ    safeOptions
 getOptionList	   normalizeOptionPattern   updateOptions
 hasOptionQ	   optionKeysToIgnore	
-#+END_EXAMPLE
+  #+END_EXAMPLE
 
-The usual scheme to use =SafeOptions= is as follows:
+  The usual scheme to use =SafeOptions= is as follows:
 
-#+BEGIN_SRC mathematica
+  #+BEGIN_SRC mathematica
 Options[foo3] = createOptionList[{a->10, b->1}, Options /@ {foo1, foo2}];
 
 foo3[opts : OptionsPattern[]] :=      
@@ -151,99 +150,165 @@ foo3[opts : OptionsPattern[]] :=
 	      foo1[1, 2, filterOptionList[Options[foo1], safeOpts]]; 
 	      foo2[4, 5, filterOptionList[Options[foo2], safeOpts]];
 	];
-#+END_SRC
+  #+END_SRC
 
-Below we describe in detail the 3 main functions:
-- =createOptionList[]=
-- =getOptionList[]=
-- =updateOptions[]=
-- =filterOptionList[]=
+  Below we describe in detail the main functions:
+  - =createOptionList[]=
+  - =getOptionList[]=
+  - =filterOptionList[]=
+  - =updateOptions[]=
 
 ** The =createOptionList[]= function
 
-This function creates an exhaustive list of options:
+   This function creates an exhaustive list of options:
 
-#+BEGIN_SRC mathematica
+   #+BEGIN_SRC mathematica
 createOptionList[addeOptions,inheritedOptions,optionKeysToIgnore->{}]
-#+END_SRC
+   #+END_SRC
 
-- =addeOptions= are the options you want to add or overload with a default value
-- =inheritedOptions= are the option of the used subroutines
-- =optionKeysToIgnore= is the list of option keys you want to remove
-  from the user interface
+   - =addeOptions= are the options you want to add or overload with a default value
+   - =inheritedOptions= are the used subroutines options
+   - =optionKeysToIgnore= is the list of option keys you want to remove
+     from the user interface
 
 *** Examples
 
 **** Basic usage
 
- #+BEGIN_SRC mathematica
+     #+BEGIN_SRC mathematica
 createOptionList[{a->1}, {{b->2}, {c->3, d->4}}]
- #+END_SRC
- #+BEGIN_EXAMPLE
+     #+END_SRC
+     #+BEGIN_EXAMPLE
 {a->1, b->2, c->3, d->4}
- #+END_EXAMPLE
+     #+END_EXAMPLE
 
 **** Ignored options
 
-  #+BEGIN_SRC mathematica
-createOptionList[{a->1}, {{b->2}, {c->3, d->4}}, optionKeysToIgnore->{b} ]
-  #+END_SRC
-  #+BEGIN_EXAMPLE
+     #+BEGIN_SRC mathematica
+createOptionList[{a->1}, {{b->2}, {c->3, d->4}}, optionKeysToIgnore->{b}]
+     #+END_SRC
+     #+BEGIN_EXAMPLE
 {a->1, c->3, d->4}
-  #+END_EXAMPLE
+     #+END_EXAMPLE
 
 **** Option value conflict
-  #+BEGIN_SRC mathematica
+     #+BEGIN_SRC mathematica
 createOptionList[{a->1}, {{b->2}, {c->3, b->3, d->4}}]
- #+END_SRC
-  #+BEGIN_EXAMPLE
+     #+END_SRC
+     #+BEGIN_EXAMPLE
 safeOptions::incompatibleOptions: Some options are incompatibles {b->{2,3}}
 $Failed
-  #+END_EXAMPLE
+     #+END_EXAMPLE
 
-You can solve this by either:
-- ignoring the option, =optionKeysToIgnore->{b}= (as before):
-  #+BEGIN_SRC mathematica
-createOptionList[{a->1}, {{b->2}, {c->3, b->3, d->4}}, optionKeysToIgnore->{b} ]
- #+END_SRC
-  #+BEGIN_EXAMPLE
-{a->1, c->3, d->4}
-  #+END_EXAMPLE
+     You can solve this by either:
+     - ignoring the option, =optionKeysToIgnore->{b}= (as before):
+       #+BEGIN_SRC mathematica
+createOptionList[{a->1}, {{b->2}, {c->3, b->3, d->4}}, optionKeysToIgnore->{b}]
+       #+END_SRC
+       #+BEGIN_EXAMPLE
+     {a->1, c->3, d->4}
+       #+END_EXAMPLE
 
-- explicitly defining a default value:
-  #+BEGIN_SRC mathematica
+     - explicitly defining a default value:
+       #+BEGIN_SRC mathematica
 createOptionList[{a->1, b->2}, {{b->2}, {c->3, b->3, d->4}}]
- #+END_SRC
-  #+BEGIN_EXAMPLE
-{a->1, b->2, c->3, d->4}
-  #+END_EXAMPLE
+       #+END_SRC
+       #+BEGIN_EXAMPLE
+     {a->1, b->2, c->3, d->4}
+       #+END_EXAMPLE
 
 **** Possibly generated errors
 
-The function generates an error in the followings case:
+     The function generates an error in the followings case:
 
-- adding and ignoring an option in the same time:
-  #+BEGIN_SRC mathematica
+     - adding and ignoring an option in the same time:
+       #+BEGIN_SRC mathematica
 createOptionList[{a->1, b->2}, {{b->2}, {c->3, b->3, d->4}}, optionKeysToIgnore->{b}]
- #+END_SRC
-  #+BEGIN_EXAMPLE
-safeOptions::cannotAddAndIgnore: Cannot add and ignore in the same times these options: {b}
-$Failed
-  #+END_EXAMPLE
-- incompatible option value 
-  #+BEGIN_SRC mathematica
+       #+END_SRC
+       #+BEGIN_EXAMPLE
+     safeOptions::cannotAddAndIgnore: Cannot add and ignore in the same times these options: {b}
+     $Failed
+       #+END_EXAMPLE
+     - incompatible option value 
+       #+BEGIN_SRC mathematica
 createOptionList[{a->1}, {{b->2}, {c->3, b->3, d->4}}]
- #+END_SRC
-  #+BEGIN_EXAMPLE
-safeOptions::incompatibleOptions: Some options are incompatibles {b->{2,3}}
+       #+END_SRC
+       #+BEGIN_EXAMPLE
+     safeOptions::incompatibleOptions: Some options are incompatibles {b->{2,3}}
+     $Failed
+       #+END_EXAMPLE
+** =getOptionList[]=
+
+   This function retrieves the whole set of options, taking into account
+   =opts= user options.
+
+   #+BEGIN_SRC mathematica
+createOptionList[alloptions,optsOptions]
+   #+END_SRC
+
+   - =allOptions= the complete list of function options, generally obtained by =Options[foo]=
+   - =optsOptions= the options provided by the =opts:OptionPattern[]= argument
+
+*** Examples
+    #+BEGIN_SRC mathematica
+getOptionList[{a -> 1, b -> 2}]
+    #+END_SRC
+    #+BEGIN_EXAMPLE
+{a -> 1, b -> 2}
+    #+END_EXAMPLE
+
+    #+BEGIN_SRC mathematica
+getOptionList[{a->1, b->2}, {b->3}]
+    #+END_SRC
+    #+BEGIN_EXAMPLE
+{a -> 1, b -> 3}
+    #+END_EXAMPLE
+**** Possibly generated errors
+     - in case of unknown option 
+       #+BEGIN_SRC mathematica
+getOptionList[{a->1, b->2}, {c->3}]
+       #+END_SRC
+     #+BEGIN_EXAMPLE
+safeOptions::unknownOptions: Unknown options {c}
 $Failed
-  #+END_EXAMPLE
+     #+END_EXAMPLE
+     - in case of duplicated options
+       #+BEGIN_SRC mathematica
+getOptionList[{a -> 1, b -> 2, b -> 3}, {a -> 1}]
+       #+END_SRC
+     #+BEGIN_EXAMPLE
+safeOptions::duplicateOptions: Duplicate options {b}
+$Failed
+     #+END_EXAMPLE
+
+     #+BEGIN_SRC mathematica
+getOptionList[{a -> 1, b -> 2}, {a -> 1, a -> 2}]
+     #+END_SRC
+     #+BEGIN_EXAMPLE
+safeOptions::duplicateOptions: Duplicate options {a}
+$Failed
+     #+END_EXAMPLE
+**  =filterOptionList[]=
+
+The role of this function is to filter options when calling a subroutine:
+
+     #+BEGIN_SRC mathematica
+getOptionList[subroutineOptions,allOptions]
+     #+END_SRC
+
+Typical usages is:
+
+     #+BEGIN_SRC mathematica
+filterOptionList[Options[subroutine], allOptions]
+     #+END_SRC
+
+*** Examples:
 
 ** Other stuff of lesser importance
 
 *** =safeOptions= 
 
-Is a symbol reserved for error messages.
+    Is a symbol reserved for error messages.
 
 
 
