@@ -16,7 +16,7 @@ and perform option forwarding.
 Imagine that you have 2 functions: foo1 and foo2, where a,b are your
 algorithm parameters:
 
-#+BEGIN_SRC wolfram
+#+BEGIN_SRC mathematica
 Options[foo1] = {a -> 1, b -> 2};
 
 foo1[arg__, opts : OptionsPattern[]] := 
@@ -30,7 +30,7 @@ foo2[arg__, opts : OptionsPattern[]] :=
 
 Now you want to define a foo3 function that reuses foo1 and foo2:
 
-#+BEGIN_SRC wolfram
+#+BEGIN_SRC mathematica
 Options[foo3] = {a -> 10, c -> 4};
 
 foo3[opts : OptionsPattern[]] :=
@@ -42,7 +42,7 @@ foo3[opts : OptionsPattern[]] :=
 
 Now observe that
 
-#+BEGIN_SRC wolfram
+#+BEGIN_SRC mathematica
 foo3[]
 #+END_SRC
 
@@ -60,7 +60,7 @@ foo2 b=-2
 
 You can force this manually
 
-#+BEGIN_SRC wolfram
+#+BEGIN_SRC mathematica
 foo3[a -> 10, b -> 2]
 #+END_SRC
 
