@@ -434,7 +434,7 @@ False <- Should be True
 #+END_EXAMPLE
 
 The *solution* is to use =normalizeOptionPattern[]= that transforms all
-this different forms into a well define list of rules:
+these different forms into a well define list of transformation rules:
 
 #+BEGIN_SRC mathematica
 foo[opts:OptionsPattern[]]:=normalizeOptionPattern[opts]
