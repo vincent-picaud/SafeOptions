@@ -485,6 +485,8 @@ True
 
 ** Illustration of the general scheme
 
+A little bit overkill, but for illustration purpose:
+
 #+BEGIN_SRC mathematica 
 Options[foo1] = createOptionList[{a -> 1, b -> 2}];
 
@@ -495,7 +497,9 @@ Block[{safeOpts},
 
    Print["foo1 a=", optionValue[safeOpts,a], " b=", optionValue[safeOpts,b]]; 
    ];
+#+END_SRC
 
+#+BEGIN_SRC mathematica 
 Options[foo2] = createOptionList[{b -> -2}];
 
 foo2[arg__, opts : OptionsPattern[]] := 
@@ -505,7 +509,9 @@ foo2[arg__, opts : OptionsPattern[]] :=
 
    Print["foo2 b=", optionValue[safeOpts,b]];
    ];
+#+END_SRC
 
+#+BEGIN_SRC mathematica 
 Options[foo3] = createOptionList[{a -> 10, b -> 1, c -> 4}, Options /@ {foo1, foo2}];
 
 foo3[opts : OptionsPattern[]] :=      
@@ -523,5 +529,5 @@ foo3[opts : OptionsPattern[]] :=
 * Installation
 
 The easiest way to install this package is to clone this directory and
-use the Mathematica front end =File =-> =Install= to install the
+use the Mathematica front end =File->Install= to install the
 =SafeOptions.m= file.
