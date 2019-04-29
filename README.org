@@ -1,4 +1,4 @@
-#+TITLE: SafeOptions, a package for safer option management
+#+TITLE: A MMA package for safer option management
 
 * What is it?
 
@@ -13,7 +13,7 @@
    However with this scheme you have to control option value coherence
    and perform option forwarding.
 
-   Imagine that you have 2 functions: foo1 and foo2, where a,b are your
+   Imagine that you have 2 functions: =foo1= and =foo2=, where =a=, =b= are your
    algorithm parameters:
 
    #+BEGIN_SRC mathematica
@@ -28,7 +28,7 @@ foo2[arg__, opts : OptionsPattern[]] :=
 	Print["foo2 b=", OptionValue[b]];
    #+END_SRC
 
-   Now you want to define a foo3 function that reuses foo1 and foo2:
+   Now you want to define a =foo3= function that reuses =foo1= and =foo2=:
 
    #+BEGIN_SRC mathematica
 Options[foo3] = {a->10, c->4};
@@ -56,7 +56,7 @@ foo2 b=-2
    *There are two main issues:*
 
    - the =a->10= default value is not forwarded
-   - incompatible option =b->2= for foo1 and =b->-2= for foo2 is not detected
+   - incompatible option =b->2= for =foo1= and =b->-2= for =foo2= is not detected
 
    You can force this *manually*
 
@@ -70,8 +70,7 @@ foo1 a=10 b=2
 foo2 b=2
    #+END_EXAMPLE
 
-   However this is not a good solution as you have to "manually" manage
-   all the option details.
+   However this is not a practical solution...
 
    This is the point where this package comes to the rescue.
 
@@ -89,7 +88,10 @@ Options[foo3] = createOptionList[{a->10, b->1}, Options /@ {foo1, foo2}];
 
 foo3[opts : OptionsPattern[]] :=      
 	Block[{safeOpts},
-	      If[(safeOpts = getOptionList[Options[foo3], opts]) === $Failed, Return[$Failed]];
+
+	      If[(safeOpts = getOptionList[Options[foo3], opts]) === $Failed, 
+		 Return[$Failed]];
+
 	      foo1[1, 2, filterOptionList[Options[foo1], safeOpts]]; 
 	      foo2[4, 5, filterOptionList[Options[foo2], safeOpts]];
 	];
@@ -109,13 +111,13 @@ foo2 b=1
    #+END_EXAMPLE
    as expected. The options are *correctly forwarded*.
 
-   Also observe that if we do not provide a default value =b->1= option:
+   Also observe that if we do not provide the default option value =b->1=
 
    #+BEGIN_SRC mathematica
 Options[foo3] = createOptionList[{a->10}, Options /@ {foo1, foo2}]
    #+END_SRC
 
-   *an error message is generated as =b= option has two incompatible values*:
+ an *error message is generated in case of incompatible option values*:
    #+BEGIN_EXAMPLE
 safeOptions::incompatibleOptions: Some options are incompatibles {b->{2,-2}}
 $Failed
@@ -136,14 +138,17 @@ getOptionList	   normalizeOptionPattern   updateOptions
 hasOptionQ	   optionKeysToIgnore	
   #+END_EXAMPLE
 
-  The usual scheme to use =SafeOptions= is as follows:
+  The usual scheme to use =SafeOptions= is *always the same* and is as
+  follows:
 
   #+BEGIN_SRC mathematica
 Options[foo3] = createOptionList[{a->10, b->1}, Options /@ {foo1, foo2}];
 
 foo3[opts : OptionsPattern[]] :=      
 	Block[{safeOpts},
-	      If[(safeOpts = getOptionList[Options[foo3], opts]) === $Failed, Return[$Failed]];
+
+	      If[(safeOpts = getOptionList[Options[foo3], opts]) === $Failed, 
+		 Return[$Failed]];
 
 	      safeOpts = updateOptions[safeOpts, b->2];
 
@@ -152,21 +157,20 @@ foo3[opts : OptionsPattern[]] :=
 	];
   #+END_SRC
 
-  Below we describe in detail the main functions:
+  The main functions you must know are:
   - =createOptionList[]=
   - =getOptionList[]=
   - =filterOptionList[]=
-  - =updateOptions[]=
 
 ** The =createOptionList[]= function
 
-   This function creates an exhaustive list of options:
+   This function creates an *exhaustive* list of options:
 
    #+BEGIN_SRC mathematica
-createOptionList[addeOptions,inheritedOptions,optionKeysToIgnore->{}]
+createOptionList[addedOptions,inheritedOptions,optionKeysToIgnore->{}]
    #+END_SRC
 
-   - =addeOptions= are the options you want to add or overload with a default value
+   - =addedOptions= are the options you want to add or overload with a default value
    - =inheritedOptions= are the used subroutines options
    - =optionKeysToIgnore= is the list of option keys you want to remove
      from the user interface
@@ -219,7 +223,7 @@ createOptionList[{a->1, b->2}, {{b->2}, {c->3, b->3, d->4}}]
 
 **** Possibly generated errors
 
-     The function generates an error in the followings case:
+     The function generates an error in the followings cases:
 
      - adding and ignoring an option in the same time:
        #+BEGIN_SRC mathematica
@@ -239,15 +243,16 @@ createOptionList[{a->1}, {{b->2}, {c->3, b->3, d->4}}]
        #+END_EXAMPLE
 ** =getOptionList[]=
 
-   This function retrieves the whole set of options, taking into account
-   =opts= user options.
+   This function retrieves the whole set of options, taking into
+   account the modifications from the =opts= function argument.
 
    #+BEGIN_SRC mathematica
-createOptionList[alloptions,optsOptions]
+getOptionList[alloptions,opts]
    #+END_SRC
 
-   - =allOptions= the complete list of function options, generally obtained by =Options[foo]=
-   - =optsOptions= the options provided by the =opts:OptionPattern[]= argument
+   - =allOptions= the complete list of the current function options,
+     generally obtained by =Options[foo]=
+   - =opts= the options provided by the =opts:OptionPattern[]= argument
 
 *** Examples
     #+BEGIN_SRC mathematica
@@ -293,14 +298,14 @@ $Failed
 The role of this function is to filter options when calling a subroutine:
 
      #+BEGIN_SRC mathematica
-getOptionList[subroutineOptions,allOptions]
+filterOptionList[subroutineOptions,allOptions]
      #+END_SRC
 
-Typical usages is:
-
-     #+BEGIN_SRC mathematica
-filterOptionList[Options[subroutine], allOptions]
-     #+END_SRC
+- =subroutineOptions= the exhaustive list of the subroutine options,
+  generally =Options[subroutine]=.
+- =allOptions= the exhaustive list of the current function options. This
+  list is generally the one obtained thanks to the =getOptionlist[]=
+  function.
 
 *** Examples:
 
