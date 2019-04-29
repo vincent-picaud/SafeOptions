@@ -309,6 +309,32 @@ filterOptionList[subroutineOptions,allOptions]
 
 *** Examples:
 
+     #+BEGIN_SRC mathematica
+filterOptionList[{a -> 1}, {a -> 2, b -> 3}]
+     #+END_SRC
+#+BEGIN_EXAMPLE
+{a -> 2}
+#+END_EXAMPLE
+**** Possibly generated errors
+
+In case of duplicate option 
+#+BEGIN_SRC mathematica
+filterOptionList[{a -> 1, a -> 2}, {a -> 2, b -> 3}]
+#+END_SRC
+#+BEGIN_EXAMPLE
+safeOptions::duplicateOptions: Duplicate options {a}
+$Failed
+#+END_EXAMPLE
+
+#+BEGIN_SRC mathematica
+filterOptionList[{a -> 1}, {a -> 2, b -> 3, b -> 4}]
+#+END_SRC
+#+BEGIN_EXAMPLE
+safeOptions::duplicateOptions: Duplicate options {b}
+$Failed
+#+END_EXAMPLE
+
+    
 ** Other stuff of lesser importance
 
 *** =safeOptions= 
