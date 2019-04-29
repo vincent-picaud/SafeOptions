@@ -483,5 +483,45 @@ True
 True
 #+END_EXAMPLE
 
+** Illustration of the general scheme
 
+#+BEGIN_SRC mathematica 
+Options[foo1] = createOptionList[{a -> 1, b -> 2}];
 
+foo1[arg__, opts : OptionsPattern[]] := 
+Block[{safeOpts},
+
+   If[(safeOpts = getOptionList[Options[foo1],opts])===$Failed,Return[$Failed]];
+
+   Print["foo1 a=", optionValue[safeOpts,a], " b=", optionValue[safeOpts,b]]; 
+   ];
+
+Options[foo2] = createOptionList[{b -> -2}];
+
+foo2[arg__, opts : OptionsPattern[]] := 
+ Block[{safeOpts},
+
+   If[(safeOpts = getOptionList[Options[foo2],opts])===$Failed,Return[$Failed]];
+
+   Print["foo2 b=", optionValue[safeOpts,b]];
+   ];
+
+Options[foo3] = createOptionList[{a -> 10, b -> 1, c -> 4}, Options /@ {foo1, foo2}];
+
+foo3[opts : OptionsPattern[]] :=      
+  Block[{safeOpts},
+ 
+   If[(safeOpts = getOptionList[Options[foo3],opts])===$Failed,Return[$Failed]];
+   
+   safeOpts=updateOptions[safeOpts,b->3];
+   
+   foo1[1, 2,filterOptionList[Options[foo1],safeOpts]]; 
+   foo2[4, 5,filterOptionList[Options[foo2],safeOpts]];
+  ];
+#+END_SRC
+
+* Installation
+
+The easiest way to install this package is to clone this directory and
+use the Mathematica front end =File =-> =Install= to install the
+=SafeOptions.m= file.

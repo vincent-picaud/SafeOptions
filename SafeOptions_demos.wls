@@ -91,7 +91,7 @@ foo3[a->5] (* ok for a, but error prone... here we forgot b *)
 
 
 (* ::Subchapter:: *)
-(*OptionPattern is very permissive: solution use normalizeOptionPattern[]*)
+(*OptionsPattern is very permissive: solution use normalizeOptionPattern[]*)
 
 
 foo[opts:OptionsPattern[]]:=normalizeOptionPattern[opts]
@@ -216,16 +216,16 @@ Options[foo3] = createOptionList[{a -> 10, b->1,c -> 4}, Options /@ {foo1, foo2}
 Options[foo1] = createOptionList[{a -> 1, b -> 2}];
 
 foo1[arg__, opts : OptionsPattern[]] := 
-Block[{safeOpts = getOptionList[Options[foo1],opts]},
-   If[safeOpts===$Failed,Return[$Failed]];
+Block[{safeOpts},
+   If[(safeOpts = getOptionList[Options[foo1],opts])===$Failed,Return[$Failed]];
    Print["foo1 a=", optionValue[safeOpts,a], " b=", optionValue[safeOpts,b]]; 
    ];
 
 Options[foo2] = createOptionList[{b -> -2}];
 
 foo2[arg__, opts : OptionsPattern[]] := 
- Block[{safeOpts = getOptionList[Options[foo2],opts]},
-   If[safeOpts===$Failed,Return[$Failed]];
+ Block[{safeOpts},
+   If[(safeOpts = getOptionList[Options[foo2],opts])===$Failed,Return[$Failed]];
    Print["foo2 b=", optionValue[safeOpts,b]];
    ];
 
@@ -237,18 +237,18 @@ foo2[arg__, opts : OptionsPattern[]] :=
 Options[foo3] = createOptionList[{a -> 10, b -> 1, c -> 4}, Options /@ {foo1, foo2}];
 
 foo3[opts : OptionsPattern[]] :=      
-  Block[{safeOpts = getOptionList[Options[foo3],opts]},
-   If[safeOpts===$Failed,Return[$Failed]];
+  Block[{safeOpts},
+ 
+   If[(safeOpts = getOptionList[Options[foo3],opts])===$Failed,Return[$Failed]];
+   
+   safeOpts=updateOptions[safeOpts,b->3];
+   
    foo1[1, 2,filterOptionList[Options[foo1],safeOpts]]; 
    foo2[4, 5,filterOptionList[Options[foo2],safeOpts]];
   ];
 
 
-(* ::Text:: *)
-(*foo3 works as before*)
-
-
-foo3[]
+foo3[c->2]
 
 
 foo3[a->5]
