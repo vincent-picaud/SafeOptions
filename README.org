@@ -334,8 +334,14 @@ safeOptions::duplicateOptions: Duplicate options {b}
 $Failed
 #+END_EXAMPLE
 
-    
-** Other stuff of lesser importance
+** Other functions
+
+*** =optionValue[]=
+
+This functions retrieve option value
+#+BEGIN_SRC mathematica
+optionValue[allOptions,optionKey]
+#+END_SRC
 
 *** =safeOptions= 
 
