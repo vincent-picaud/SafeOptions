@@ -1,4 +1,10 @@
 (* ::Package:: *)
+(* :Author: Vincent Picaud *)
+(* :Date: Mon 29 Apr 2019 10:42:54 AM CEST *)
+(* :Package Version: 1.0 *)
+(* :Mathematica Version: *)
+(* :Copyright: (c) 2019 Vincent Picaud *)
+(* :Keywords: Option Management *)
 
 BeginPackage["SafeOptions`"];
 Unprotect @@ Names["SafeOptions`*"];
