@@ -1,4 +1,5 @@
 (* ::Package:: *)
+
 (* :Author: Vincent Picaud *)
 (* :Date: Mon 29 Apr 2019 10:42:54 AM CEST *)
 (* :Package Version: 1.0 *)
@@ -82,7 +83,6 @@ updateOptions::usage=
 "checks if the option k is already defined and switch to the right appendOptions[...] or updateOptions[...] functions according to the test result.";
 
 
-ignoreOption::usage="An option to defined ignored option list (used in createOptionList[...])";
 createOptionList::usage=
 "createOptionList[addedOptions_?normalizedOptionListQ, inheritedOptions : {{_ ...} ..}, opts : OptionsPattern[]]\n"<>
 "createOptionList[addedOptions_?normalizedOptionListQ, inheritedOptions_?normalizedOptionListQ, opts : OptionsPattern[]]\n"<>
